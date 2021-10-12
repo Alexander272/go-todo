@@ -26,14 +26,37 @@ type Auth interface {
 	RemoveSession(token string) error
 }
 
+type TodoList interface {
+	Create(ctx context.Context, list domain.TodoList) error
+	GetAll(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoList, error)
+	GetById(ctx context.Context, listId primitive.ObjectID) (*domain.TodoList, error)
+	GetByTitle(ctx context.Context, userId primitive.ObjectID, title string) (*domain.TodoList, error)
+	Update(ctx context.Context, input domain.TodoList) error
+	Remove(ctx context.Context, listId primitive.ObjectID) error
+}
+
+type TodoItem interface {
+	Create(ctx context.Context, item domain.TodoItem) error
+	GetByListId(ctx context.Context, userId primitive.ObjectID, listId primitive.ObjectID) ([]domain.TodoItem, error)
+	GetByUserId(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoItem, error)
+	GetById(ctx context.Context, itemId primitive.ObjectID) (*domain.TodoItem, error)
+	GetByTitle(ctx context.Context, userId primitive.ObjectID, title string) (*domain.TodoItem, error)
+	Update(ctx context.Context, input domain.TodoItem) error
+	Remove(ctx context.Context, itemId primitive.ObjectID) error
+}
+
 type Repositories struct {
 	Users
 	Auth
+	TodoList
+	TodoItem
 }
 
 func NewRepositories(db *mongo.Database, client *redis.Client) *Repositories {
 	return &Repositories{
-		Auth:  NewAuthRepo(client),
-		Users: NewUsersRepo(db),
+		Auth:     NewAuthRepo(client),
+		Users:    NewUsersRepo(db),
+		TodoList: NewTodoListRepo(db),
+		TodoItem: NewTodoItemRepo(db),
 	}
 }
