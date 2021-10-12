@@ -1,0 +1,21 @@
+http:
+  port: 8080
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+
+cache:
+  ttl: 3600s
+
+auth:
+  accessTokenTTL: 2h
+  refreshTokenTTL: 720h #30 days
+  verificationCodeLength: 8
+
+mongo:
+  databaseName: todo
+
+redis:
+  host: localhost
+  port: 6379
+  db: 0
