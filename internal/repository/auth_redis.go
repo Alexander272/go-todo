@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthRepo struct {
@@ -19,7 +18,7 @@ func NewAuthRepo(client *redis.Client) *AuthRepo {
 }
 
 type RedisData struct {
-	UserId primitive.ObjectID
+	UserId string
 	Email  string
 	Role   string
 	Ua     string
