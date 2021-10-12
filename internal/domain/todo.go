@@ -23,8 +23,8 @@ type TodoItem struct {
 	Title       string             `json:"title" bson:"title"`
 	Description string             `json:"description" bson:"description"`
 	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
-	CompletedAt time.Time          `json:"completedAt" bson:"completedAt"`
-	DeadlineAt  time.Time          `json:"deadlineAt" bson:"deadlineAt"`
+	CompletedAt time.Time          `json:"completedAt" bson:"completedAt,omitempty"`
+	DeadlineAt  time.Time          `json:"deadlineAt" bson:"deadlineAt,omitempty"`
 	Done        bool               `json:"done" bson:"done"`
 	Priority    int                `json:"priority" bson:"priority"`
 	Tags        []string           `json:"tags" bson:"tags"`

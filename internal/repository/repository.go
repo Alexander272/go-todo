@@ -43,6 +43,7 @@ type TodoItem interface {
 	GetByTitle(ctx context.Context, userId primitive.ObjectID, title string) (*domain.TodoItem, error)
 	Update(ctx context.Context, input domain.TodoItem) error
 	Remove(ctx context.Context, itemId primitive.ObjectID) error
+	RemoveByListId(ctx context.Context, listId primitive.ObjectID) error
 }
 
 type Repositories struct {

@@ -115,3 +115,8 @@ func (r *TodoItemRepo) Remove(ctx context.Context, itemId primitive.ObjectID) er
 	_, err := r.db.DeleteOne(ctx, bson.M{"_id": itemId})
 	return err
 }
+
+func (r *TodoItemRepo) RemoveByListId(ctx context.Context, listId primitive.ObjectID) error {
+	_, err := r.db.DeleteMany(ctx, bson.M{"listId": listId})
+	return err
+}
