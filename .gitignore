@@ -3,4 +3,4 @@ config/prod.yml
 tmp
 .data
 
-node_modules
+*node_modules
