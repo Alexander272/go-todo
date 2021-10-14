@@ -2,3 +2,5 @@
 config/prod.yml
 tmp
 .data
+
+node_modules
