@@ -23,6 +23,7 @@ func NewUsersRepo(db *mongo.Database) *UsersRepo {
 }
 
 func (r *UsersRepo) Create(ctx context.Context, user domain.User) error {
+	user.Role = "user"
 	_, err := r.db.InsertOne(ctx, user)
 	return err
 }

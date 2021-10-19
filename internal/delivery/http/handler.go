@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Alexander272/go-todo/docs"
 	"github.com/Alexander272/go-todo/internal/config"
 	v1 "github.com/Alexander272/go-todo/internal/delivery/http/v1"
 	"github.com/Alexander272/go-todo/internal/service"
@@ -11,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
-	"github.com/swaggo/swag/example/basic/docs"
 )
 
 type Handler struct {
@@ -45,11 +45,11 @@ func (h *Handler) Init(conf *config.Config) *gin.Engine {
 	}
 
 	if conf.Environment != "prod" {
-		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		router.GET("/api/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
 	// Init router
-	router.GET("/ping", func(c *gin.Context) {
+	router.GET("/api/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
 

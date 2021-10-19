@@ -62,7 +62,7 @@ require (
 	github.com/spf13/viper v1.9.0
 	github.com/swaggo/swag v1.7.3
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/tools v0.1.5 // indirect
 )
 
@@ -80,5 +80,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
+	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
 	gopkg.in/ini.v1 v1.63.2 // indirect
 )

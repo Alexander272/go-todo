@@ -1,0 +1,871 @@
+basePath: /api/v1
+definitions:
+  domain.TodoItem:
+    properties:
+      completedAt:
+        type: string
+      createdAt:
+        type: string
+      deadlineAt:
+        type: string
+      description:
+        type: string
+      done:
+        type: boolean
+      id:
+        type: string
+      listId:
+        type: string
+      priority:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      userId:
+        type: string
+    type: object
+  domain.TodoList:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      userId:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      registeredAt:
+        type: string
+      role:
+        type: string
+      userUrl:
+        type: string
+    type: object
+  v1.CreateList:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  v1.CreateTodo:
+    properties:
+      deadlineAt:
+        type: string
+      description:
+        type: string
+      listId:
+        type: string
+      priority:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - listId
+    - title
+    type: object
+  v1.SignInInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  v1.SignUpInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  v1.Token:
+    properties:
+      accessToken:
+        type: string
+    type: object
+  v1.UpdateList:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
+  v1.UpdateTodo:
+    properties:
+      deadlineAt:
+        type: string
+      description:
+        type: string
+      done:
+        type: boolean
+      listId:
+        type: string
+      priority:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - listId
+    type: object
+  v1.UserUpdateInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      userUrl:
+        type: string
+    type: object
+  v1.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  v1.statusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Server for Todo App
+  title: Todo App
+  version: "0.1"
+paths:
+  /{listId}/todo:
+    get:
+      consumes:
+      - application/json
+      description: получение задач конкретного списка
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.TodoItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Items By List Id
+      tags:
+      - todo
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: обновление токенов доступа
+      operationId: refresh
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: Refresh
+      tags:
+      - auth
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: user sign in
+      parameters:
+      - description: sign in info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SignInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: SignIn
+      tags:
+      - auth
+  /auth/sign-out:
+    post:
+      consumes:
+      - application/json
+      description: выход из системы
+      operationId: logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: SignOut
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create user account
+      parameters:
+      - description: sign up info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SignUpInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      summary: SignUp
+      tags:
+      - auth
+  /list/:
+    get:
+      consumes:
+      - application/json
+      description: получение всех пользовательских списков
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.TodoList'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Lists
+      tags:
+      - list
+    post:
+      consumes:
+      - application/json
+      description: создание списка
+      parameters:
+      - description: list info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateList'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create List
+      tags:
+      - list
+  /list/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: удаление списка
+      parameters:
+      - description: list id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove List
+      tags:
+      - list
+    get:
+      consumes:
+      - application/json
+      description: получение данных списка
+      parameters:
+      - description: list id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.TodoList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get List By Id
+      tags:
+      - list
+    put:
+      consumes:
+      - application/json
+      description: обновление данных списка
+      parameters:
+      - description: list id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: list info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update List
+      tags:
+      - list
+  /todo/:
+    post:
+      consumes:
+      - application/json
+      description: создание задачи
+      parameters:
+      - description: todo info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateTodo'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Item
+      tags:
+      - todo
+  /todo/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: удаление задачи
+      parameters:
+      - description: todo id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove Item
+      tags:
+      - todo
+    get:
+      consumes:
+      - application/json
+      description: получение одной задачи
+      parameters:
+      - description: todo id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.TodoItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Item By Id
+      tags:
+      - todo
+    put:
+      consumes:
+      - application/json
+      description: обновление задачи
+      parameters:
+      - description: todo id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: todo info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateTodo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Item
+      tags:
+      - todo
+  /todo/all:
+    get:
+      consumes:
+      - application/json
+      description: получение всех задач пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.TodoItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Items
+      tags:
+      - todo
+  /user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: удаление пользователя и всех его данных
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove User By Id
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: получение данных пользователя
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get User By Id
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: обновление данных пользователя по его id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: user info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UserUpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/v1.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update User By Id
+      tags:
+      - user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
