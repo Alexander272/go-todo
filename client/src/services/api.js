@@ -20,13 +20,11 @@ api.interceptors.response.use(
 
         if (error.response.status === 401 && error.config && !error.config._isRetry) {
             originalRequest._isRetry = true
-            // const { user } = store.dispatch
             try {
-                // const res = await api.get(`/auth/refresh`)
-                // user.setUser(res.data)
+                const res = await api.get(`/auth/refresh`)
+                store.dispatch('auth/refresh', res.data)
                 return api.request(originalRequest)
             } catch (e) {
-                // user.clearUser()
                 return Promise.reject(e)
             }
         }
