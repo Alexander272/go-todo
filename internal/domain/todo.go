@@ -16,6 +16,23 @@ type TodoList struct {
 	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
 }
 
+type TodoListWithItems struct {
+	Id          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	UserId      primitive.ObjectID `json:"userId" bson:"userId,omitempty"`
+	Title       string             `json:"title" bson:"title"`
+	Description string             `json:"description" bson:"description"`
+	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
+	Todos       []Todo             `json:"todos" bson:"todos"`
+}
+
+type Todo struct {
+	Id         primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Title      string             `json:"title" bson:"title"`
+	DeadlineAt time.Time          `json:"deadlineAt" bson:"deadlineAt,omitempty"`
+	Done       bool               `json:"done" bson:"done"`
+	Priority   int                `json:"priority" bson:"priority"`
+}
+
 type TodoItem struct {
 	Id          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	UserId      primitive.ObjectID `json:"userId" bson:"userId,omitempty"`

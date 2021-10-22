@@ -1,4 +1,4 @@
-import AuthService from '../services/auth.service'
+import authService from '../services/auth.service'
 
 export const authModule = {
     namespaced: true,
@@ -17,6 +17,9 @@ export const authModule = {
     getters: {
         isAuth(state) {
             return !!state.token.accessToken
+        },
+        getToken(state) {
+            return state.token.accessToken
         },
     },
     mutations: {
@@ -49,8 +52,8 @@ export const authModule = {
     actions: {
         async signIn({ commit }, user) {
             try {
-                const data = await AuthService.signIn(user.email, user.password)
-                const decode = AuthService.decodeToken(data.accessToken)
+                const data = await authService.signIn(user.email, user.password)
+                const decode = authService.decodeToken(data.accessToken)
                 if (!decode) {
                     commit('setError', 'authorization failed')
                 } else {
@@ -62,7 +65,7 @@ export const authModule = {
         },
         async signUp({ commit }, user) {
             try {
-                const data = await AuthService.signUp(user.login, user.email, user.password)
+                const data = await authService.signUp(user.login, user.email, user.password)
                 if (data.status) {
                     commit('setMessage', '')
                 } else {
@@ -74,7 +77,7 @@ export const authModule = {
         },
         async signOut({ commit }) {
             try {
-                await AuthService.signOut()
+                await authService.signOut()
                 commit('clearUser')
             } catch (error) {
                 commit('setError', error.message)
@@ -82,8 +85,8 @@ export const authModule = {
         },
         async refresh({ commit, getters }) {
             try {
-                const data = await AuthService.refresh()
-                const decode = AuthService.decodeToken(data.accessToken)
+                const data = await authService.refresh()
+                const decode = authService.decodeToken(data.accessToken)
                 if (!decode) commit('setError', 'refresh failed')
                 if (getters.isAuth) {
                     commit('setToken', decode)

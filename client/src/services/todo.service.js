@@ -3,7 +3,7 @@ import api from './api'
 class TodoService {
     async getTodos(listId) {
         try {
-            const res = await api.get(`/${listId}/todo`)
+            const res = await api.get(`/${listId}/todo/`)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -12,7 +12,7 @@ class TodoService {
 
     async getAllTodo() {
         try {
-            const res = await api.get(`/todo/all`)
+            const res = await api.get(`/todo/all/`)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -21,7 +21,7 @@ class TodoService {
 
     async getTodoById(id) {
         try {
-            const res = await api.get(`/todo/${id}`)
+            const res = await api.get(`/todo/${id}/`)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -30,7 +30,7 @@ class TodoService {
 
     async createTodo(todo) {
         try {
-            const res = await api.post(`/todo`, todo)
+            const res = await api.post(`/todo/`, todo)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -39,7 +39,7 @@ class TodoService {
 
     async updateTodo(id, todo) {
         try {
-            const res = await api.put(`/todo/${id}`, todo)
+            const res = await api.put(`/todo/${id}/`, todo)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -48,10 +48,12 @@ class TodoService {
 
     async removeTodo(id) {
         try {
-            const res = await api.delete(`/todo/${id}`)
+            const res = await api.delete(`/todo/${id}/`)
             return res.data
         } catch (error) {
             throw error.response.data
         }
     }
 }
+
+export default new TodoService()

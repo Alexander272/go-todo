@@ -50,6 +50,10 @@ func (s *TodoListServise) GetAllLists(ctx context.Context, userId primitive.Obje
 	return s.repo.GetAll(ctx, userId)
 }
 
+func (s *TodoListServise) GetAllListsWithTodo(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoListWithItems, error) {
+	return s.repo.GetAllWithTodo(ctx, userId)
+}
+
 func (s *TodoListServise) GetListById(ctx context.Context, listId primitive.ObjectID) (*domain.TodoList, error) {
 	return s.repo.GetById(ctx, listId)
 }

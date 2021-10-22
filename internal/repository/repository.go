@@ -29,6 +29,7 @@ type Auth interface {
 type TodoList interface {
 	Create(ctx context.Context, list domain.TodoList) error
 	GetAll(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoList, error)
+	GetAllWithTodo(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoListWithItems, error)
 	GetById(ctx context.Context, listId primitive.ObjectID) (*domain.TodoList, error)
 	GetByTitle(ctx context.Context, userId primitive.ObjectID, title string) (*domain.TodoList, error)
 	Update(ctx context.Context, input domain.TodoList) error

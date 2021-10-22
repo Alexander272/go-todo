@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 class AuthService {
     async signIn(email, password) {
         try {
-            const res = await api.post('/auth/sign-in', { email, password })
+            const res = await api.post('/auth/sign-in/', { email, password })
             return res.data
         } catch (error) {
             throw error.response.data
@@ -13,7 +13,7 @@ class AuthService {
 
     async signUp(name, email, passord) {
         try {
-            const res = await api.post('/auth/sign-up', { name, email, passord })
+            const res = await api.post('/auth/sign-up/', { name, email, passord })
             return res.data
         } catch (error) {
             throw error.response.data
@@ -22,7 +22,7 @@ class AuthService {
 
     async refresh() {
         try {
-            const res = await api.post('/auth/refresh')
+            const res = await api.post('/auth/refresh/')
             return res.data
         } catch (error) {
             throw error.response.data
@@ -31,7 +31,7 @@ class AuthService {
 
     async signOut() {
         try {
-            const res = await api.post('/auth/sign-out')
+            const res = await api.post('/auth/sign-out/')
             return res.data
         } catch (error) {
             throw error.response.data

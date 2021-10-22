@@ -14,6 +14,7 @@ func (h *Handler) initListRoutes(api *gin.RouterGroup) {
 	{
 		list.GET("/", h.getAllLists)
 		list.POST("/", h.createList)
+		list.GET("/todo", h.getAllListsWithTodo)
 		list.GET("/:id", h.getListById)
 		list.PUT("/:id", h.updateList)
 		list.DELETE("/:id", h.removeList)
@@ -25,8 +26,8 @@ func (h *Handler) initListRoutes(api *gin.RouterGroup) {
 // @Tags list
 // @Description получение всех пользовательских списков
 // @ModuleID getAllLists
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Success 200 {array} domain.TodoList
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
@@ -53,6 +54,39 @@ func (h *Handler) getAllLists(c *gin.Context) {
 	c.JSON(http.StatusOK, lists)
 }
 
+// @Summary Get All Lists With Todo
+// @Security ApiKeyAuth
+// @Tags list
+// @Description получение всех пользовательских списков вместе с задачами
+// @ModuleID getAllListsWithTodo
+// @Accept json
+// @Produce json
+// @Success 200 {array} domain.TodoListWithItems
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /list/todo [get]
+func (h *Handler) getAllListsWithTodo(c *gin.Context) {
+	ctxId, exists := c.Get(userIdCtx)
+	if !exists {
+		newErrorResponse(c, http.StatusForbidden, "access not allowed")
+		return
+	}
+	userId, err := primitive.ObjectIDFromHex(fmt.Sprintf("%v", ctxId))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	lists, err := h.services.TodoList.GetAllListsWithTodo(c, userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, lists)
+}
+
 type CreateList struct {
 	Title       string `json:"title" binding:"required,min=3,max=128"`
 	Description string `json:"description"`
@@ -63,8 +97,8 @@ type CreateList struct {
 // @Security ApiKeyAuth
 // @Description создание списка
 // @ModuleID createList
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param input body CreateList true "list info"
 // @Success 201 {object} statusResponse
 // @Failure 400,404 {object} errorResponse
@@ -105,8 +139,8 @@ func (h *Handler) createList(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Description получение данных списка
 // @ModuleID getListById
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path string true "list id"
 // @Success 200 {object} domain.TodoList
 // @Failure 400,404 {object} errorResponse
@@ -144,8 +178,8 @@ type UpdateList struct {
 // @Security ApiKeyAuth
 // @Description обновление данных списка
 // @ModuleID updateList
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path string true "list id"
 // @Param input body UpdateList true "list info"
 // @Success 200 {object} statusResponse
@@ -187,8 +221,8 @@ func (h *Handler) updateList(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Description удаление списка
 // @ModuleID removeList
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path string true "list id"
 // @Success 200 {object} statusResponse
 // @Failure 400,404 {object} errorResponse

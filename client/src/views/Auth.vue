@@ -66,7 +66,7 @@
 import { ref, computed, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import InputField from '../components/InputField.vue'
+import InputField from '@/components/InputField.vue'
 
 export default {
     components: { InputField },

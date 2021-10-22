@@ -3,7 +3,7 @@ import api from './api'
 class ListService {
     async getLists() {
         try {
-            const res = await api.get('/list')
+            const res = await api.get('/list/')
             return res.data
         } catch (error) {
             throw error.response.data
@@ -12,7 +12,7 @@ class ListService {
 
     async getListById(id) {
         try {
-            const res = await api.get(`/list/${id}`)
+            const res = await api.get(`/list/${id}/`)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -21,7 +21,7 @@ class ListService {
 
     async createList(list) {
         try {
-            const res = await api.post('/list', list)
+            const res = await api.post('/list/', list)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -30,7 +30,7 @@ class ListService {
 
     async updateList(id, list) {
         try {
-            const res = await api.put(`/list/${id}`, list)
+            const res = await api.put(`/list/${id}/`, list)
             return res.data
         } catch (error) {
             throw error.response.data
@@ -39,10 +39,12 @@ class ListService {
 
     async removeList(id) {
         try {
-            const res = await api.delete(`/list/${id}`)
+            const res = await api.delete(`/list/${id}/`)
             return res.data
         } catch (error) {
             throw error.response.data
         }
     }
 }
+
+export default new ListService()

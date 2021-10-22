@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/Alexander272/go-todo/internal/domain"
+	"github.com/Alexander272/go-todo/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -38,6 +39,36 @@ func (r *TodoListRepo) GetAll(ctx context.Context, userId primitive.ObjectID) ([
 	if err := cursor.All(ctx, &lists); err != nil {
 		return nil, err
 	}
+	return lists, nil
+}
+
+func (r *TodoListRepo) GetAllWithTodo(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoListWithItems, error) {
+	cursor, err := r.db.Aggregate(ctx, []bson.M{
+		{
+			"$lookup": bson.M{
+				"from": todoListCollection,
+				"pipeline": bson.M{
+					"$match": bson.M{"userId": userId},
+				},
+				"as": "list",
+			},
+		},
+		{
+			"$unwind": "$list",
+		},
+	})
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, domain.ErrListNotFound
+		}
+		return nil, err
+	}
+
+	var lists []domain.TodoListWithItems
+	if err := cursor.All(ctx, &lists); err != nil {
+		return nil, err
+	}
+	logger.Debug(lists)
 	return lists, nil
 }
 

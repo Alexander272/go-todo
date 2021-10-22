@@ -46,6 +46,7 @@ type User interface {
 type TodoList interface {
 	CreateList(ctx context.Context, input CreateTodoList) error
 	GetAllLists(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoList, error)
+	GetAllListsWithTodo(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoListWithItems, error)
 	GetListById(ctx context.Context, listId primitive.ObjectID) (*domain.TodoList, error)
 	UpdateList(ctx context.Context, listId primitive.ObjectID, input UpdateTodolist) error
 	RemoveList(ctx context.Context, listId primitive.ObjectID) error
