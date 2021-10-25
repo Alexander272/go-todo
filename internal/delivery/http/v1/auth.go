@@ -6,6 +6,7 @@ import (
 
 	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/Alexander272/go-todo/internal/service"
+	"github.com/Alexander272/go-todo/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,6 +41,7 @@ type SignUpInput struct {
 func (h *Handler) signUp(c *gin.Context) {
 	var inp SignUpInput
 	if err := c.BindJSON(&inp); err != nil {
+		logger.Debug(err)
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}

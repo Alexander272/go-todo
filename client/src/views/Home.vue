@@ -1,22 +1,15 @@
 <template>
-    <div class="full" v-if="loading || !ready">
-        <loader size="large" />
-    </div>
-
-    <div v-else class="container">
-        <p>Home</p>
-        <div v-if="fetching" class="part"><loader /></div>
-
-        <div class="lists" v-if="isEmptyList">
-            <todo-list
-                v-for="item in lists"
-                :key="item.id"
-                :title="item.title"
-                :description="item.description"
-                :createdAt="item.createdAt"
-            />
+    <div class="wrapper">
+        <div class="full" v-if="loading || !ready">
+            <loader size="large" />
         </div>
-        <p v-else>Ни одного списка не создано</p>
+
+        <div v-else class="container">
+            <side-bar />
+            <main class="main">
+                <router-view></router-view>
+            </main>
+        </div>
     </div>
 </template>
 
@@ -27,10 +20,11 @@ import { useStore } from 'vuex'
 import useCheckAuth from '@/composables/useCheckAuth'
 import TodoList from '@/components/TodoList.vue'
 import Loader from '../components/Loader.vue'
+import SideBar from '../components/SideBar.vue'
 
 export default {
     name: 'Home',
-    components: { TodoList, Loader },
+    components: { TodoList, Loader, SideBar },
     setup() {
         const { loading, ready } = useCheckAuth()
         const store = useStore()
@@ -40,10 +34,13 @@ export default {
             store.state.lists.lists.value ? store.state.lists.lists.length === 0 : true
         )
 
+        const getList = condition => {
+            if (condition && store.getters['auth/isAuth']) store.dispatch('lists/getLists')
+        }
+        getList(ready)
+
         watch(ready, newValue => {
-            if (newValue && store.getters['auth/isAuth']) {
-                store.dispatch('lists/getLists')
-            }
+            getList(newValue)
         })
 
         return { loading, ready, lists, isEmptyList, fetching }
@@ -57,11 +54,21 @@ export default {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    width: 100%;
 }
 
-.part {
+.container {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-basis: 100%;
+}
+
+.main {
+    margin: 15px;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    flex-basis: 85%;
+    box-sizing: border-box;
+    box-shadow: 3px 3px 6px #0000002e;
 }
 </style>

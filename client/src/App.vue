@@ -28,9 +28,9 @@ body {
     font-family: 'Montserrat', sans-serif;
 }
 
-// #app {
-
-// }
+#app {
+    background-color: #eee;
+}
 
 .wrapper {
     min-height: 100vh;

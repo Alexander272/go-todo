@@ -96,11 +96,11 @@ func (r *TodoItemRepo) Update(ctx context.Context, input domain.TodoItem) error 
 	if input.Priority != 0 {
 		update["priority"] = input.Priority
 	}
-	if !input.DeadlineAt.IsZero() {
+	if input.DeadlineAt != 0 {
 		update["deadlineAt"] = input.DeadlineAt
 	}
 	if input.Done {
-		update["completedAt"] = time.Now()
+		update["completedAt"] = time.Now().Unix()
 	}
 	if len(input.Tags) != 0 {
 		update["tags"] = input.Tags

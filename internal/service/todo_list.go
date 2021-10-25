@@ -41,7 +41,7 @@ func (s *TodoListServise) CreateList(ctx context.Context, input CreateTodoList) 
 		UserId:      input.UserId,
 		Title:       input.Title,
 		Description: input.Description,
-		CreatedAt:   time.Now(),
+		CreatedAt:   time.Now().Unix(),
 	}
 	return s.repo.Create(ctx, list)
 }

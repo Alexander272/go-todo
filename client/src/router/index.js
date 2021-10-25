@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Auth from '../views/Auth.vue'
+import Todo from '../views/Todo.vue'
 import store from '../store'
 
 const requireAuth = (to, from, next) => {
@@ -23,6 +24,24 @@ const routes = [
         name: 'Auth',
         component: Auth,
     },
+    {
+        path: '/list/',
+        component: Home,
+        beforeEnter: requireAuth,
+        children: [
+            {
+                path: ':listId',
+                name: 'todo',
+                component: Todo,
+            },
+        ],
+    },
+    // {
+    //     path: '/list/:listId',
+    //     name: 'todo',
+    //     component: Todo,
+    //     beforeEnter: requireAuth,
+    // },
     {
         path: '/about',
         name: 'About',

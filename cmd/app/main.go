@@ -74,7 +74,7 @@ func main() {
 		TokenManager:           tokenManager,
 		AccessTokenTTL:         conf.Auth.JWT.AccessTokenTTL,
 		RefreshTokenTTL:        conf.Auth.JWT.RefreshTokenTTL,
-		Domain:                 conf.Http.Host,
+		Domain:                 conf.Http.Domain,
 		VerificationCodeLength: conf.Auth.VerificationCodeLength,
 	})
 	handlers := delivery.NewHandler(services)

@@ -26,14 +26,14 @@ export const listModule = {
     actions: {
         async getLists({ commit }) {
             try {
-                commit('setLoading', true)
+                commit('setLoading', true, { root: true })
                 const data = await listService.getLists()
                 if (data) commit('setLists', data)
                 else commit('setLists', [])
             } catch (error) {
                 commit('setError', error.message)
             } finally {
-                commit('setLoading', false)
+                commit('setLoading', false, { root: true })
             }
         },
         async createList({ commit }, list) {

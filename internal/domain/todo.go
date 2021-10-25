@@ -13,7 +13,7 @@ type TodoList struct {
 	UserId      primitive.ObjectID `json:"userId" bson:"userId,omitempty"`
 	Title       string             `json:"title" bson:"title"`
 	Description string             `json:"description" bson:"description"`
-	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
+	CreatedAt   int64              `json:"createdAt" bson:"createdAt"`
 }
 
 type TodoListWithItems struct {
@@ -21,7 +21,7 @@ type TodoListWithItems struct {
 	UserId      primitive.ObjectID `json:"userId" bson:"userId,omitempty"`
 	Title       string             `json:"title" bson:"title"`
 	Description string             `json:"description" bson:"description"`
-	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
+	CreatedAt   int64              `json:"createdAt" bson:"createdAt"`
 	Todos       []Todo             `json:"todos" bson:"todos"`
 }
 
@@ -39,9 +39,9 @@ type TodoItem struct {
 	ListId      primitive.ObjectID `json:"listId" bson:"listId,omitempty"`
 	Title       string             `json:"title" bson:"title"`
 	Description string             `json:"description" bson:"description"`
-	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
-	CompletedAt time.Time          `json:"completedAt" bson:"completedAt,omitempty"`
-	DeadlineAt  time.Time          `json:"deadlineAt" bson:"deadlineAt,omitempty"`
+	CreatedAt   int64              `json:"createdAt" bson:"createdAt"`
+	CompletedAt int64              `json:"completedAt" bson:"completedAt,omitempty"`
+	DeadlineAt  int64              `json:"deadlineAt" bson:"deadlineAt,omitempty"`
 	Done        bool               `json:"done" bson:"done"`
 	Priority    int                `json:"priority" bson:"priority"`
 	Tags        []string           `json:"tags" bson:"tags"`

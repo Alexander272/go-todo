@@ -11,6 +11,7 @@
     REDIS_PASSWORD=""
 
     HTTP_HOST="http://localhost"
+    HTTP_DOMAIN="localhost"
 
     JWT_KEY="<secret key>"
 

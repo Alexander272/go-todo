@@ -52,6 +52,7 @@ type (
 	HttpConfig struct {
 		Host               string        `mapstructure:"host"`
 		Port               string        `mapstructure:"port"`
+		Domain             string        `mapstructure:"domain"`
 		ReadTimeout        time.Duration `mapstructure:"readTimeout"`
 		WriteTimeout       time.Duration `mapstructure:"writeTimeout"`
 		MaxHeaderMegabytes int           `mapstructure:"maxHeaderBytes"`

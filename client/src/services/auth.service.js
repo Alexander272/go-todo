@@ -11,9 +11,9 @@ class AuthService {
         }
     }
 
-    async signUp(name, email, passord) {
+    async signUp(name, email, password) {
         try {
-            const res = await api.post('/auth/sign-up/', { name, email, passord })
+            const res = await api.post('/auth/sign-up/', { name, email, password })
             return res.data
         } catch (error) {
             throw error.response.data

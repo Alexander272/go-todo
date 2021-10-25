@@ -1,20 +1,22 @@
 <template>
-    <div class="block" :class="[variant, size, rounded]">
-        <div class="dropdown"></div>
-        <router-link :to="path" class="link">
-            {{ text }}
-        </router-link>
-    </div>
+    <button
+        class="button"
+        @click="$emit('onClick')"
+        :disabled="disabled"
+        :class="[variant, size, rounded]"
+    >
+        <app-icon :icon="icon" class="icon" />
+        {{ text }}
+    </button>
 </template>
 
 <script>
+import { FontAwesomeIcon as AppIcon } from '@fortawesome/vue-fontawesome'
 export default {
-    name: 'LinkButton',
+    name: 'Button',
+    components: { AppIcon },
+    emits: ['onClick'],
     props: {
-        path: {
-            type: String,
-            default: '/',
-        },
         text: {
             type: String,
             required: true,
@@ -23,6 +25,7 @@ export default {
             type: Boolean,
             default: false,
         },
+        icon: String,
         variant: {
             type: String,
             validator(value) {
@@ -45,75 +48,79 @@ export default {
             default: 'medium',
         },
     },
-    setup() {
-        return {}
-    },
+    setup() {},
 }
 </script>
 
 <style lang="scss" scoped>
 $primaryColor: #6425d3;
 $dangerColor: #e32525;
-.block {
+.button {
     transition: 0.3s all ease-out;
-    border-radius: 16px;
+    border-radius: 12px;
     display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
     position: relative;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    // text-align: center;
 
-    &:hover {
-        .link {
-            color: #fff;
-        }
-        .dropdown {
-            width: 100%;
-        }
+    &:active {
+        box-shadow: 5px 5px 12px 0px #00030675 inset;
+    }
+
+    &:disabled {
+        background-color: #c3c3c3;
+        color: #919191;
+        cursor: not-allowed;
     }
 }
-
-.link {
-    text-decoration: none;
-    transition: 0.3s all ease-out;
-    text-transform: uppercase;
-    display: flex;
-    width: 100%;
-    min-height: 100%;
-    justify-content: center;
-    font-weight: bold;
-    z-index: 5;
-}
-
-.dropdown {
-    transition: 0.3s all ease-out;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0%;
+.icon {
+    margin-right: 10px;
+    pointer-events: none;
 }
 
 .primary {
     border: 2px solid $primaryColor;
-    .dropdown {
-        background-color: $primaryColor;
+    background: $primaryColor;
+    color: #fff;
+
+    &:hover {
+        background: #782bff;
+        border-color: #782bff;
     }
-    .link {
-        color: $primaryColor;
+}
+.danger {
+    border: 2px solid $dangerColor;
+    background: $dangerColor;
+    color: #fff;
+}
+.ghost {
+    border: 2px solid $primaryColor;
+    background: transparent;
+    color: $primaryColor;
+
+    &:hover {
+        border-color: #8946ff;
+        color: #8946ff;
     }
 }
 
-.small .link {
+.small {
     border-width: 1px;
     font-size: 0.8rem;
-    padding: 6px 10px;
+    padding: 5px 10px;
 }
-.middle .link {
+.middle {
     font-size: 1rem;
-    padding: 10px 15px;
+    padding: 7px 15px;
 }
-.large .link {
+.large {
     font-size: 1.2rem;
-    padding: 14px 20px;
+    padding: 11px 20px;
 }
 
 .none {

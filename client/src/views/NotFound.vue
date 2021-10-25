@@ -23,7 +23,10 @@ export default {
 <style lang="scss" scoped>
 .center {
     width: 100%;
-    align-self: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #fff;
 }
 
 .number {
