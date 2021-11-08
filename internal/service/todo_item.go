@@ -25,18 +25,20 @@ type CreateTodoItem struct {
 	ListId      primitive.ObjectID
 	Title       string
 	Description string
-	DeadlineAt  time.Time
+	DeadlineAt  int64
 	Priority    int
 	Tags        []string
 }
 
-func (s *TodoItemService) CreateItem(ctx context.Context, input CreateTodoItem) error {
+func (s *TodoItemService) CreateItem(ctx context.Context, input CreateTodoItem) (interface{}, error) {
 	candidate, err := s.repo.GetByTitle(ctx, input.UserId, input.Title)
-	if !errors.Is(err, domain.ErrItemNotFound) {
-		return err
+	if err != nil {
+		if !errors.Is(err, domain.ErrItemNotFound) {
+			return nil, err
+		}
 	}
 	if candidate != nil {
-		return domain.ErrItemAlreadyExists
+		return nil, domain.ErrItemAlreadyExists
 	}
 
 	item := domain.TodoItem{
@@ -45,7 +47,7 @@ func (s *TodoItemService) CreateItem(ctx context.Context, input CreateTodoItem) 
 		Title:       input.Title,
 		Description: input.Description,
 		CreatedAt:   time.Now().Unix(),
-		DeadlineAt:  input.DeadlineAt.Unix(),
+		DeadlineAt:  input.DeadlineAt,
 		Done:        false,
 		Priority:    input.Priority,
 		Tags:        input.Tags,

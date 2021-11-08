@@ -44,7 +44,7 @@ type User interface {
 }
 
 type TodoList interface {
-	CreateList(ctx context.Context, input CreateTodoList) error
+	CreateList(ctx context.Context, input CreateTodoList) (interface{}, error)
 	GetAllLists(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoList, error)
 	GetAllListsWithTodo(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoListWithItems, error)
 	GetListById(ctx context.Context, listId primitive.ObjectID) (*domain.TodoList, error)
@@ -53,7 +53,7 @@ type TodoList interface {
 }
 
 type TodoItem interface {
-	CreateItem(ctx context.Context, input CreateTodoItem) error
+	CreateItem(ctx context.Context, input CreateTodoItem) (interface{}, error)
 	GetItemsByListId(ctx context.Context, userId, listId primitive.ObjectID) ([]domain.TodoItem, error)
 	GetItemsByUserId(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoItem, error)
 	GetItemsById(ctx context.Context, itemId primitive.ObjectID) (*domain.TodoItem, error)

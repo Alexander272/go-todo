@@ -31,6 +31,7 @@ type Todo struct {
 	DeadlineAt time.Time          `json:"deadlineAt" bson:"deadlineAt,omitempty"`
 	Done       bool               `json:"done" bson:"done"`
 	Priority   int                `json:"priority" bson:"priority"`
+	Tags       []string           `json:"tags" bson:"tags"`
 }
 
 type TodoItem struct {

@@ -1,13 +1,18 @@
 <template>
     <div class="wrapper">
-        <div class="full" v-if="loading || !ready">
-            <loader size="large" />
-        </div>
-
-        <div v-else class="container">
+        <transition name="fade" mode="out-in">
+            <div class="full" v-if="loading || !ready">
+                <loader size="large" />
+            </div>
+        </transition>
+        <div class="container">
             <side-bar />
             <main class="main">
-                <router-view></router-view>
+                <router-view v-slot="{ Component }">
+                    <transition name="fade" mode="out-in">
+                        <component :is="Component" />
+                    </transition>
+                </router-view>
             </main>
         </div>
     </div>
@@ -28,11 +33,6 @@ export default {
     setup() {
         const { loading, ready } = useCheckAuth()
         const store = useStore()
-        const lists = computed(() => store.state.lists.lists)
-        const fetching = computed(() => store.state.lists.loading)
-        const isEmptyList = computed(() =>
-            store.state.lists.lists.value ? store.state.lists.lists.length === 0 : true
-        )
 
         const getList = condition => {
             if (condition && store.getters['auth/isAuth']) store.dispatch('lists/getLists')
@@ -43,18 +43,33 @@ export default {
             getList(newValue)
         })
 
-        return { loading, ready, lists, isEmptyList, fetching }
+        return { loading, ready }
     },
 }
 </script>
 
 <style lang="scss" scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
 .full {
+    background: #eee;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 150;
 }
 
 .container {

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Alexander272/go-todo/internal/service"
+	"github.com/Alexander272/go-todo/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -17,7 +18,7 @@ func (h *Handler) initItemRoutes(api *gin.RouterGroup) {
 		todo.POST("/", h.createItem)
 		todo.GET("/all", h.getAllItems)
 		todo.GET("/:id", h.getItemById)
-		todo.PUT("/:id", h.updateItem)
+		todo.PATCH("/:id", h.updateItem)
 		todo.DELETE("/:id", h.removeItem)
 	}
 }
@@ -69,7 +70,7 @@ type CreateTodo struct {
 	ListId      primitive.ObjectID `json:"listId" binding:"required"`
 	Title       string             `json:"title" binding:"required,min=3,max=128"`
 	Description string             `json:"description"`
-	DeadlineAt  time.Time          `json:"deadlineAt"`
+	DeadlineAt  int64              `json:"deadlineAt"`
 	Priority    int                `json:"priority"`
 	Tags        []string           `json:"tags"`
 }
@@ -82,7 +83,7 @@ type CreateTodo struct {
 // @Accept  json
 // @Produce  json
 // @Param input body CreateTodo true "todo info"
-// @Success 201 {object} statusResponse
+// @Success 201 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
@@ -101,11 +102,12 @@ func (h *Handler) createItem(c *gin.Context) {
 
 	var input CreateTodo
 	if err := c.BindJSON(&input); err != nil {
+		logger.Debug(err.Error())
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
-	if err := h.services.TodoItem.CreateItem(c, service.CreateTodoItem{
+	id, err := h.services.TodoItem.CreateItem(c, service.CreateTodoItem{
 		UserId:      userId,
 		ListId:      input.ListId,
 		Title:       input.Title,
@@ -113,12 +115,13 @@ func (h *Handler) createItem(c *gin.Context) {
 		DeadlineAt:  input.DeadlineAt,
 		Priority:    input.Priority,
 		Tags:        input.Tags,
-	}); err != nil {
+	})
+	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, statusResponse{"Created"})
+	c.JSON(http.StatusCreated, idResponse{Status: "Created", Id: id})
 }
 
 // @Summary Get All Items
@@ -211,7 +214,7 @@ type UpdateTodo struct {
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /todo/{id} [put]
+// @Router /todo/{id} [patch]
 func (h *Handler) updateItem(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {

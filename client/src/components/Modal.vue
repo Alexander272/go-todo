@@ -1,18 +1,20 @@
 <template>
-    <div class="backdrop">
-        <div class="modal">
-            <div class="header">
-                <p class="title">{{ title }}</p>
-                <app-icon class="icon" icon="times" @click="$emit('close')" />
-            </div>
-            <div class="body">
-                <slot></slot>
-            </div>
-            <div class="footer">
-                <slot name="footer"></slot>
+    <transition name="fade">
+        <div v-if="condition" class="backdrop">
+            <div class="modal">
+                <div class="header">
+                    <p class="title">{{ title }}</p>
+                    <app-icon class="icon" icon="times" @click="$emit('close')" />
+                </div>
+                <div class="body">
+                    <slot></slot>
+                </div>
+                <div class="footer">
+                    <slot name="footer"></slot>
+                </div>
             </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 <script>
@@ -23,6 +25,10 @@ export default {
     emits: ['close'],
     props: {
         title: String,
+        condition: {
+            type: Boolean,
+            default: false,
+        },
     },
     setup() {},
 }
@@ -30,6 +36,16 @@ export default {
 
 <style lang="scss" scoped>
 $primaryColor: #6425d3;
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
 .backdrop {
     position: fixed;
     top: 0;
@@ -40,9 +56,10 @@ $primaryColor: #6425d3;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 50;
 }
 .modal {
-    min-width: 450px;
+    min-width: 550px;
     z-index: 500;
     background-color: #fff;
     border-radius: 12px;
@@ -65,6 +82,7 @@ $primaryColor: #6425d3;
 .icon {
     cursor: pointer;
     transition: 0.3s all ease-in-out;
+    margin-left: 10px;
 
     &:hover {
         color: $primaryColor;

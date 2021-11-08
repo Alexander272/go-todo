@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type TodoListRepo struct {
@@ -21,13 +22,17 @@ func NewTodoListRepo(db *mongo.Database) *TodoListRepo {
 	}
 }
 
-func (r *TodoListRepo) Create(ctx context.Context, list domain.TodoList) error {
-	_, err := r.db.InsertOne(ctx, list)
-	return err
+func (r *TodoListRepo) Create(ctx context.Context, list domain.TodoList) (interface{}, error) {
+	res, err := r.db.InsertOne(ctx, list)
+	if err != nil {
+		return nil, err
+	}
+	return res.InsertedID, err
 }
 
 func (r *TodoListRepo) GetAll(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoList, error) {
-	cursor, err := r.db.Find(ctx, bson.M{"userId": userId})
+	opts := options.Find().SetSort(bson.M{"createdAt": -1})
+	cursor, err := r.db.Find(ctx, bson.M{"userId": userId}, opts)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, domain.ErrListNotFound

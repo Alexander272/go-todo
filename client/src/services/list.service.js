@@ -30,7 +30,7 @@ class ListService {
 
     async updateList(id, list) {
         try {
-            const res = await api.put(`/list/${id}/`, list)
+            const res = await api.patch(`/list/${id}/`, list)
             return res.data
         } catch (error) {
             throw error.response.data

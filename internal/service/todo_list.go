@@ -28,13 +28,15 @@ type CreateTodoList struct {
 	Description string
 }
 
-func (s *TodoListServise) CreateList(ctx context.Context, input CreateTodoList) error {
+func (s *TodoListServise) CreateList(ctx context.Context, input CreateTodoList) (interface{}, error) {
 	candidate, err := s.repo.GetByTitle(ctx, input.UserId, input.Title)
-	if !errors.Is(err, domain.ErrListNotFound) {
-		return err
+	if err != nil {
+		if !errors.Is(err, domain.ErrListNotFound) {
+			return nil, err
+		}
 	}
 	if candidate != nil {
-		return domain.ErrListAlreadyExists
+		return nil, domain.ErrListAlreadyExists
 	}
 
 	list := domain.TodoList{
@@ -59,14 +61,13 @@ func (s *TodoListServise) GetListById(ctx context.Context, listId primitive.Obje
 }
 
 type UpdateTodolist struct {
-	Id          primitive.ObjectID
 	Title       string
 	Description string
 }
 
 func (s *TodoListServise) UpdateList(ctx context.Context, listId primitive.ObjectID, input UpdateTodolist) error {
 	list := domain.TodoList{
-		Id:          input.Id,
+		Id:          listId,
 		Title:       input.Title,
 		Description: input.Description,
 	}

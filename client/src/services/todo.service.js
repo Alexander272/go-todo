@@ -37,9 +37,9 @@ class TodoService {
         }
     }
 
-    async updateTodo(id, todo) {
+    async updateTodo(todo) {
         try {
-            const res = await api.put(`/todo/${id}/`, todo)
+            const res = await api.patch(`/todo/${todo.id}/`, todo)
             return res.data
         } catch (error) {
             throw error.response.data

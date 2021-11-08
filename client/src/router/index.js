@@ -31,17 +31,11 @@ const routes = [
         children: [
             {
                 path: ':listId',
-                name: 'todo',
+                name: 'Todo',
                 component: Todo,
             },
         ],
     },
-    // {
-    //     path: '/list/:listId',
-    //     name: 'todo',
-    //     component: Todo,
-    //     beforeEnter: requireAuth,
-    // },
     {
         path: '/about',
         name: 'About',

@@ -5,7 +5,7 @@
         :disabled="disabled"
         :class="[variant, size, rounded]"
     >
-        <app-icon :icon="icon" class="icon" />
+        <app-icon v-if="icon" :icon="icon" class="icon" />
         {{ text }}
     </button>
 </template>
@@ -56,7 +56,7 @@ export default {
 $primaryColor: #6425d3;
 $dangerColor: #e32525;
 .button {
-    transition: 0.3s all ease-out;
+    transition: 0.2s all ease-out;
     border-radius: 12px;
     display: flex;
     justify-content: center;
@@ -106,6 +106,7 @@ $dangerColor: #e32525;
     &:hover {
         border-color: #8946ff;
         color: #8946ff;
+        background: #7a84f51a;
     }
 }
 

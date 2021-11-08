@@ -16,7 +16,7 @@ func (h *Handler) initListRoutes(api *gin.RouterGroup) {
 		list.POST("/", h.createList)
 		list.GET("/todo", h.getAllListsWithTodo)
 		list.GET("/:id", h.getListById)
-		list.PUT("/:id", h.updateList)
+		list.PATCH("/:id", h.updateList)
 		list.DELETE("/:id", h.removeList)
 	}
 }
@@ -100,7 +100,7 @@ type CreateList struct {
 // @Accept json
 // @Produce json
 // @Param input body CreateList true "list info"
-// @Success 201 {object} statusResponse
+// @Success 201 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
@@ -122,16 +122,17 @@ func (h *Handler) createList(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.TodoList.CreateList(c, service.CreateTodoList{
+	id, err := h.services.TodoList.CreateList(c, service.CreateTodoList{
 		UserId:      userId,
 		Title:       inp.Title,
 		Description: inp.Description,
-	}); err != nil {
+	})
+	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, statusResponse{"Created"})
+	c.JSON(http.StatusCreated, idResponse{Status: "Created", Id: id})
 }
 
 // @Summary Get List By Id
@@ -186,7 +187,7 @@ type UpdateList struct {
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /list/{id} [put]
+// @Router /list/{id} [patch]
 func (h *Handler) updateList(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {

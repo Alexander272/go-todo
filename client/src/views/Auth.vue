@@ -35,6 +35,7 @@
                             id="name"
                             name="name"
                             labelText="Логин"
+                            :errorText="signUp.errorLogin"
                             v-model="signUp.login"
                         />
                         <input-field
@@ -42,6 +43,7 @@
                             name="email"
                             type="email"
                             labelText="Email"
+                            :errorText="signUp.errorEmail"
                             v-model="signUp.email"
                         />
                         <input-field
@@ -49,6 +51,7 @@
                             name="password"
                             type="password"
                             labelText="Пароль"
+                            :errorText="signUp.errorPassword"
                             v-model="signUp.password"
                         />
                         <button class="submit" @click="checkformSignUp">Sign up</button>

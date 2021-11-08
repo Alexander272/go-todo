@@ -1,4 +1,7 @@
+import { useToast } from 'vue-toastification'
 import authService from '../services/auth.service'
+
+const toast = useToast()
 
 export const authModule = {
     namespaced: true,
@@ -60,6 +63,7 @@ export const authModule = {
                     commit('setUser', decode)
                 }
             } catch (error) {
+                toast.error(error.message)
                 commit('setError', error.message)
             }
         },
@@ -72,6 +76,7 @@ export const authModule = {
                     commit('setError', 'registration failed')
                 }
             } catch (error) {
+                toast.error(error.message)
                 commit('setError', error.message)
             }
         },
@@ -80,6 +85,7 @@ export const authModule = {
                 await authService.signOut()
                 commit('clearUser')
             } catch (error) {
+                toast.error(error.message)
                 commit('setError', error.message)
             }
         },
@@ -94,6 +100,7 @@ export const authModule = {
                     commit('setUser', decode)
                 }
             } catch (error) {
+                toast.error(error.message)
                 commit('setError', error.message)
                 commit('clearUser')
             }

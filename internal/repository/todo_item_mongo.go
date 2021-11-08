@@ -21,9 +21,12 @@ func NewTodoItemRepo(db *mongo.Database) *TodoItemRepo {
 	}
 }
 
-func (r *TodoItemRepo) Create(ctx context.Context, item domain.TodoItem) error {
-	_, err := r.db.InsertOne(ctx, item)
-	return err
+func (r *TodoItemRepo) Create(ctx context.Context, item domain.TodoItem) (interface{}, error) {
+	res, err := r.db.InsertOne(ctx, item)
+	if err != nil {
+		return nil, err
+	}
+	return res.InsertedID, err
 }
 
 func (r *TodoItemRepo) GetByListId(ctx context.Context, userId primitive.ObjectID, listId primitive.ObjectID) ([]domain.TodoItem, error) {
@@ -84,6 +87,9 @@ func (r *TodoItemRepo) GetByTitle(ctx context.Context, userId primitive.ObjectID
 
 func (r *TodoItemRepo) Update(ctx context.Context, input domain.TodoItem) error {
 	update := bson.M{}
+	update["completedAt"] = nil
+	update["done"] = false
+
 	if input.Title != "" {
 		update["title"] = input.Title
 	}
@@ -101,11 +107,11 @@ func (r *TodoItemRepo) Update(ctx context.Context, input domain.TodoItem) error 
 	}
 	if input.Done {
 		update["completedAt"] = time.Now().Unix()
+		update["done"] = input.Done
 	}
 	if len(input.Tags) != 0 {
 		update["tags"] = input.Tags
 	}
-	update["done"] = input.Done
 
 	_, err := r.db.UpdateOne(ctx, bson.M{"_id": input.Id}, bson.M{"$set": update})
 	return err
