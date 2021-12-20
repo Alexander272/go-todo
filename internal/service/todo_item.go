@@ -3,11 +3,10 @@ package service
 import (
 	"context"
 	"errors"
-	"time"
+	"fmt"
 
 	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/Alexander272/go-todo/internal/repository"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TodoItemService struct {
@@ -20,76 +19,82 @@ func NewTodoItemService(repo repository.TodoItem) *TodoItemService {
 	}
 }
 
-type CreateTodoItem struct {
-	UserId      primitive.ObjectID
-	ListId      primitive.ObjectID
-	Title       string
-	Description string
-	DeadlineAt  time.Time
-	Priority    int
-	Tags        []string
-}
+func (s *TodoItemService) Create(ctx context.Context, dto domain.CreateTodoDTO) (id string, err error) {
+	candidate, err := s.repo.GetByTitle(ctx, dto.ListId, dto.Title)
+	if err != nil {
+		if !errors.Is(err, domain.ErrItemNotFound) {
+			return id, fmt.Errorf("failed to get item by title. error: %w", err)
+		}
+	}
+	if (candidate != domain.TodoItem{}) {
+		return id, domain.ErrItemAlreadyExists
+	}
+	item := domain.NewTodo(dto)
 
-func (s *TodoItemService) CreateItem(ctx context.Context, input CreateTodoItem) error {
-	candidate, err := s.repo.GetByTitle(ctx, input.UserId, input.Title)
-	if !errors.Is(err, domain.ErrItemNotFound) {
-		return err
-	}
-	if candidate != nil {
-		return domain.ErrItemAlreadyExists
-	}
-
-	item := domain.TodoItem{
-		ListId:      input.ListId,
-		UserId:      input.UserId,
-		Title:       input.Title,
-		Description: input.Description,
-		CreatedAt:   time.Now(),
-		DeadlineAt:  input.DeadlineAt,
-		Done:        false,
-		Priority:    input.Priority,
-		Tags:        input.Tags,
-	}
 	return s.repo.Create(ctx, item)
 }
 
-func (s *TodoItemService) GetItemsByListId(ctx context.Context, userId, listId primitive.ObjectID) ([]domain.TodoItem, error) {
-	return s.repo.GetByListId(ctx, userId, listId)
-}
-
-func (s *TodoItemService) GetItemsByUserId(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoItem, error) {
-	return s.repo.GetByUserId(ctx, userId)
-}
-
-func (s *TodoItemService) GetItemsById(ctx context.Context, itemId primitive.ObjectID) (*domain.TodoItem, error) {
-	return s.repo.GetById(ctx, itemId)
-}
-
-type UpdateTodoItem struct {
-	Id          primitive.ObjectID
-	ListId      primitive.ObjectID
-	Title       string
-	Description string
-	DeadlineAt  time.Time
-	Priority    int
-	Done        bool
-	Tags        []string
-}
-
-func (s *TodoItemService) UpdateItem(ctx context.Context, input UpdateTodoItem) error {
-	item := domain.TodoItem{
-		Id:          input.Id,
-		ListId:      input.ListId,
-		Title:       input.Title,
-		Description: input.Description,
-		DeadlineAt:  input.DeadlineAt,
-		Priority:    input.Priority,
-		Done:        input.Done,
-		Tags:        input.Tags,
+func (s *TodoItemService) GetByListId(ctx context.Context, listId string) (items []domain.TodoItem, err error) {
+	items, err = s.repo.GetByListId(ctx, listId)
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return items, err
+		}
+		return items, fmt.Errorf("failed to get items. error: %w", err)
 	}
-	return s.repo.Update(ctx, item)
+	if len(items) == 0 {
+		return items, domain.ErrItemNotFound
+	}
+
+	return items, nil
 }
 
-func (s *TodoItemService) RemoveItem(ctx context.Context, itemId primitive.ObjectID) error {
-	return s.repo.Remove(ctx, itemId)
+func (s *TodoItemService) GetByUserId(ctx context.Context, userId string) (items []domain.TodoItem, err error) {
+	items, err = s.repo.GetByUserId(ctx, userId)
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return items, err
+		}
+		return items, fmt.Errorf("failed to get items. error: %w", err)
+	}
+	if len(items) == 0 {
+		return items, domain.ErrItemNotFound
+	}
+
+	return items, nil
+}
+
+func (s *TodoItemService) GetById(ctx context.Context, itemId string) (item domain.TodoItem, err error) {
+	item, err = s.repo.GetById(ctx, itemId)
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return item, err
+		}
+		return item, fmt.Errorf("failed to get item by id. error: %w", err)
+	}
+
+	return item, nil
+}
+
+func (s *TodoItemService) Update(ctx context.Context, dto domain.UpdateTodoDTO) error {
+	updateTodo := domain.UpdateTodo(dto)
+	err := s.repo.Update(ctx, updateTodo)
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return err
+		}
+		return fmt.Errorf("failed to update list. error: %w", err)
+	}
+	return nil
+}
+
+func (s *TodoItemService) Remove(ctx context.Context, itemId string) error {
+	err := s.repo.Remove(ctx, itemId)
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return err
+		}
+		return fmt.Errorf("failed to remove list. error: %w", err)
+	}
+	return nil
 }

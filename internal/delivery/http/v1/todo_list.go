@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Alexander272/go-todo/internal/service"
+	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (h *Handler) initListRoutes(api *gin.RouterGroup) {
-	list := api.Group("/list", h.userIdentity)
+	list := api.Group("/lists", h.userIdentity)
 	{
 		list.GET("/", h.getAllLists)
 		list.POST("/", h.createList)
@@ -27,35 +26,25 @@ func (h *Handler) initListRoutes(api *gin.RouterGroup) {
 // @ModuleID getAllLists
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} domain.TodoList
+// @Success 200 {object} dataResponse{data=[]domain.TodoList}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /list/ [get]
+// @Router /lists/ [get]
 func (h *Handler) getAllLists(c *gin.Context) {
-	ctxId, exists := c.Get(userIdCtx)
+	userId, exists := c.Get(userIdCtx)
 	if !exists {
 		newErrorResponse(c, http.StatusForbidden, "access not allowed")
 		return
 	}
-	userId, err := primitive.ObjectIDFromHex(fmt.Sprintf("%v", ctxId))
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	lists, err := h.services.TodoList.GetAllLists(c, userId)
+	lists, err := h.services.TodoList.GetAllLists(c, userId.(string))
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, lists)
-}
-
-type CreateList struct {
-	Title       string `json:"title" binding:"required,min=3,max=128"`
-	Description string `json:"description"`
+	c.JSON(http.StatusOK, dataResponse{Data: lists})
 }
 
 // @Summary Create List
@@ -65,39 +54,34 @@ type CreateList struct {
 // @ModuleID createList
 // @Accept  json
 // @Produce  json
-// @Param input body CreateList true "list info"
-// @Success 201 {object} statusResponse
+// @Param input body domain.CreateListDTO true "list info"
+// @Success 201 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /list/ [post]
+// @Router /lists/ [post]
 func (h *Handler) createList(c *gin.Context) {
-	ctxId, exists := c.Get(userIdCtx)
+	userId, exists := c.Get(userIdCtx)
 	if !exists {
 		newErrorResponse(c, http.StatusForbidden, "access not allowed")
 		return
 	}
-	userId, err := primitive.ObjectIDFromHex(fmt.Sprintf("%v", ctxId))
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
-	var inp CreateList
-	if err := c.BindJSON(&inp); err != nil {
+
+	var dto domain.CreateListDTO
+	if err := c.BindJSON(&dto); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
+	dto.UserId = userId.(string)
 
-	if err := h.services.TodoList.CreateList(c, service.CreateTodoList{
-		UserId:      userId,
-		Title:       inp.Title,
-		Description: inp.Description,
-	}); err != nil {
+	id, err := h.services.TodoList.CreateList(c, dto)
+	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, statusResponse{"Created"})
+	c.Header("Location", fmt.Sprintf("/api/v1/lists/%s", id))
+	c.JSON(http.StatusCreated, idResponse{Id: id, Message: "Created"})
 }
 
 // @Summary Get List By Id
@@ -108,20 +92,15 @@ func (h *Handler) createList(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "list id"
-// @Success 200 {object} domain.TodoList
+// @Success 200 {object} dataResponse{data=domain.TodoList}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /list/{id} [get]
+// @Router /lists/{id} [get]
 func (h *Handler) getListById(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	listId := c.Param("id")
+	if listId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
-		return
-	}
-	listId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
@@ -131,12 +110,7 @@ func (h *Handler) getListById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, list)
-}
-
-type UpdateList struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	c.JSON(http.StatusOK, dataResponse{Data: list})
 }
 
 // @Summary Update List
@@ -147,39 +121,31 @@ type UpdateList struct {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "list id"
-// @Param input body UpdateList true "list info"
-// @Success 200 {object} statusResponse
+// @Param input body domain.UpdateListDTO true "list info"
+// @Success 200 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /list/{id} [put]
+// @Router /lists/{id} [put]
 func (h *Handler) updateList(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	listId := c.Param("id")
+	if listId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
 		return
 	}
-	listId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	var input UpdateList
-	if err := c.BindJSON(&input); err != nil {
+	var dto domain.UpdateListDTO
+	if err := c.BindJSON(&dto); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
-	if err := h.services.TodoList.UpdateList(c, listId, service.UpdateTodolist{
-		Title:       input.Title,
-		Description: input.Description,
-	}); err != nil {
+	if err := h.services.TodoList.UpdateList(c, listId, dto); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{"Updated"})
+	c.JSON(http.StatusOK, idResponse{Id: listId, Message: "Updated"})
 }
 
 // @Summary Remove List
@@ -190,20 +156,15 @@ func (h *Handler) updateList(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "list id"
-// @Success 200 {object} statusResponse
+// @Success 204 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /list/{id} [delete]
+// @Router /lists/{id} [delete]
 func (h *Handler) removeList(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	listId := c.Param("id")
+	if listId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
-		return
-	}
-	listId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
@@ -212,5 +173,5 @@ func (h *Handler) removeList(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{"Deleted"})
+	c.JSON(http.StatusNoContent, idResponse{Message: "Deleted"})
 }

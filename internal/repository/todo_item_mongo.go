@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
-	"time"
+	"fmt"
 
 	"github.com/Alexander272/go-todo/internal/domain"
+	"github.com/Alexander272/go-todo/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,102 +22,171 @@ func NewTodoItemRepo(db *mongo.Database) *TodoItemRepo {
 	}
 }
 
-func (r *TodoItemRepo) Create(ctx context.Context, item domain.TodoItem) error {
-	_, err := r.db.InsertOne(ctx, item)
-	return err
-}
-
-func (r *TodoItemRepo) GetByListId(ctx context.Context, userId primitive.ObjectID, listId primitive.ObjectID) ([]domain.TodoItem, error) {
-	cursor, err := r.db.Find(ctx, bson.M{"userId": userId, "listId": listId})
+func (r *TodoItemRepo) Create(ctx context.Context, item domain.TodoItem) (id string, err error) {
+	res, err := r.db.InsertOne(ctx, item)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, domain.ErrItemNotFound
-		}
-		return nil, err
+		return id, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
-	var items []domain.TodoItem
+	oid, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return id, fmt.Errorf("failed to convert objectid")
+	}
+	logger.Tracef("Created document with oid %s.\n", oid)
+	return oid.Hex(), nil
+}
+
+func (r *TodoItemRepo) GetByListId(ctx context.Context, listId string) (items []domain.TodoItem, err error) {
+	oid, err := primitive.ObjectIDFromHex(listId)
+	if err != nil {
+		return items, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
+
+	filter := bson.M{"listId": oid}
+	cursor, err := r.db.Find(ctx, filter)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return items, domain.ErrItemNotFound
+		}
+		return items, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+
 	if err := cursor.All(ctx, &items); err != nil {
-		return nil, err
+		return items, fmt.Errorf("failed to decode document. error: %w", err)
 	}
 	return items, nil
 }
 
-func (r *TodoItemRepo) GetByUserId(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoItem, error) {
-	cursor, err := r.db.Find(ctx, bson.M{"userId": userId})
+// а нужен ли этот запрос?
+func (r *TodoItemRepo) GetByUserId(ctx context.Context, userId string) (items []domain.TodoItem, err error) {
+	oid, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, domain.ErrItemNotFound
-		}
-		return nil, err
+		return items, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
 	}
 
-	var items []domain.TodoItem
+	filter := bson.M{"userId": oid}
+	cursor, err := r.db.Find(ctx, filter)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return items, domain.ErrItemNotFound
+		}
+		return items, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+
 	if err := cursor.All(ctx, &items); err != nil {
-		return nil, err
+		return items, fmt.Errorf("failed to decode document. error: %w", err)
 	}
 	return items, nil
 }
 
-func (r *TodoItemRepo) GetById(ctx context.Context, itemId primitive.ObjectID) (*domain.TodoItem, error) {
-	var item *domain.TodoItem
-	if err := r.db.FindOne(ctx, bson.M{"_id": itemId}).Decode(&item); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, domain.ErrItemNotFound
+func (r *TodoItemRepo) GetById(ctx context.Context, itemId string) (item domain.TodoItem, err error) {
+	oid, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return item, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
+
+	filter := bson.M{"_id": oid}
+	res := r.db.FindOne(ctx, filter)
+	if res.Err() != nil {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+			return item, domain.ErrItemNotFound
 		}
-		return nil, err
+		return item, fmt.Errorf("failed to execute query. error: %w", res.Err())
+	}
+	if err := res.Decode(&item); err != nil {
+		return item, fmt.Errorf("failed to decode document. error: %w", err)
 	}
 
 	return item, nil
 }
 
-func (r *TodoItemRepo) GetByTitle(ctx context.Context, userId primitive.ObjectID, title string) (*domain.TodoItem, error) {
-	var item *domain.TodoItem
-	if err := r.db.FindOne(ctx, bson.M{"userId": userId, "title": title}).Decode(&item); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, domain.ErrItemNotFound
+func (r *TodoItemRepo) GetByTitle(ctx context.Context, listId string, title string) (item domain.TodoItem, err error) {
+	oid, err := primitive.ObjectIDFromHex(listId)
+	if err != nil {
+		return item, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
+
+	filter := bson.M{"listId": oid, "title": title}
+	res := r.db.FindOne(ctx, filter)
+	if res.Err() != nil {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+			return item, domain.ErrItemNotFound
 		}
-		return nil, err
+		return item, fmt.Errorf("failed to execute query. error: %w", res.Err())
+	}
+	if err := res.Decode(&item); err != nil {
+		return item, fmt.Errorf("failed to decode document. error: %w", err)
 	}
 
 	return item, nil
 }
 
-func (r *TodoItemRepo) Update(ctx context.Context, input domain.TodoItem) error {
-	update := bson.M{}
-	if input.Title != "" {
-		update["title"] = input.Title
+func (r *TodoItemRepo) Update(ctx context.Context, item domain.TodoItem) error {
+	oid, err := primitive.ObjectIDFromHex(item.Id)
+	if err != nil {
+		return fmt.Errorf("failed to convert hex to objectid. error: %w", err)
 	}
-	if input.Description != "" {
-		update["description"] = input.Description
-	}
-	if input.ListId != primitive.NilObjectID {
-		update["listId"] = input.ListId
-	}
-	if input.Priority != 0 {
-		update["priority"] = input.Priority
-	}
-	if !input.DeadlineAt.IsZero() {
-		update["deadlineAt"] = input.DeadlineAt
-	}
-	if input.Done {
-		update["completedAt"] = time.Now()
-	}
-	if len(input.Tags) != 0 {
-		update["tags"] = input.Tags
-	}
-	update["done"] = input.Done
 
-	_, err := r.db.UpdateOne(ctx, bson.M{"_id": input.Id}, bson.M{"$set": update})
-	return err
+	filter := bson.M{"_id": oid}
+	itemByte, err := bson.Marshal(item)
+	if err != nil {
+		return fmt.Errorf("failed to marshal document. error: %w", err)
+	}
+
+	var updateObj bson.M
+	if err := bson.Unmarshal(itemByte, &updateObj); err != nil {
+		return fmt.Errorf("failed to unmarshal document. error: %w", err)
+	}
+
+	delete(updateObj, "_id")
+	update := bson.M{"$set": updateObj}
+
+	res, err := r.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if res.MatchedCount == 0 {
+		return domain.ErrItemNotFound
+	}
+
+	logger.Tracef("Matched %v documents and updated %v documents.\n", res.MatchedCount, res.ModifiedCount)
+	return nil
 }
 
-func (r *TodoItemRepo) Remove(ctx context.Context, itemId primitive.ObjectID) error {
-	_, err := r.db.DeleteOne(ctx, bson.M{"_id": itemId})
-	return err
+func (r *TodoItemRepo) Remove(ctx context.Context, itemId string) error {
+	oid, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
+
+	filter := bson.M{"_id": oid}
+	res, err := r.db.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if res.DeletedCount == 0 {
+		return domain.ErrItemNotFound
+	}
+
+	logger.Tracef("Delete %v documents.\n", res.DeletedCount)
+	return nil
 }
 
-func (r *TodoItemRepo) RemoveByListId(ctx context.Context, listId primitive.ObjectID) error {
-	_, err := r.db.DeleteMany(ctx, bson.M{"listId": listId})
-	return err
+func (r *TodoItemRepo) RemoveByListId(ctx context.Context, listId string) error {
+	oid, err := primitive.ObjectIDFromHex(listId)
+	if err != nil {
+		return fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
+
+	filter := bson.M{"listId": oid}
+	res, err := r.db.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if res.DeletedCount == 0 {
+		return domain.ErrItemNotFound
+	}
+
+	logger.Tracef("Delete %v documents.\n", res.DeletedCount)
+	return nil
 }

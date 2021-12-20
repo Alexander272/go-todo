@@ -44,20 +44,20 @@ type User interface {
 }
 
 type TodoList interface {
-	CreateList(ctx context.Context, input CreateTodoList) error
-	GetAllLists(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoList, error)
-	GetListById(ctx context.Context, listId primitive.ObjectID) (*domain.TodoList, error)
-	UpdateList(ctx context.Context, listId primitive.ObjectID, input UpdateTodolist) error
-	RemoveList(ctx context.Context, listId primitive.ObjectID) error
+	CreateList(ctx context.Context, dto domain.CreateListDTO) (string, error)
+	GetAllLists(ctx context.Context, userId string) ([]domain.TodoList, error)
+	GetListById(ctx context.Context, listId string) (domain.TodoList, error)
+	UpdateList(ctx context.Context, listId string, dto domain.UpdateListDTO) error
+	RemoveList(ctx context.Context, listId string) error
 }
 
 type TodoItem interface {
-	CreateItem(ctx context.Context, input CreateTodoItem) error
-	GetItemsByListId(ctx context.Context, userId, listId primitive.ObjectID) ([]domain.TodoItem, error)
-	GetItemsByUserId(ctx context.Context, userId primitive.ObjectID) ([]domain.TodoItem, error)
-	GetItemsById(ctx context.Context, itemId primitive.ObjectID) (*domain.TodoItem, error)
-	UpdateItem(ctx context.Context, input UpdateTodoItem) error
-	RemoveItem(ctx context.Context, itemId primitive.ObjectID) error
+	Create(ctx context.Context, dto domain.CreateTodoDTO) (string, error)
+	GetByListId(ctx context.Context, listId string) ([]domain.TodoItem, error)
+	GetByUserId(ctx context.Context, userId string) ([]domain.TodoItem, error)
+	GetById(ctx context.Context, itemId string) (domain.TodoItem, error)
+	Update(ctx context.Context, dto domain.UpdateTodoDTO) error
+	Remove(ctx context.Context, itemId string) error
 }
 
 type Services struct {

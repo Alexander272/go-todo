@@ -9,7 +9,7 @@ import (
 )
 
 func (h *Handler) initUserRoutes(api *gin.RouterGroup) {
-	user := api.Group("/user", h.userIdentity)
+	user := api.Group("/users", h.userIdentity)
 	{
 		user.GET("/all", h.getAllUsers)
 		user.GET("/:id", h.getUserById)
@@ -40,7 +40,7 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /user/{id} [get]
+// @Router /users/{id} [get]
 func (h *Handler) getUserById(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -83,7 +83,7 @@ type UserUpdateInput struct {
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /user/{id} [put]
+// @Router /users/{id} [put]
 func (h *Handler) updateUserById(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -123,11 +123,11 @@ func (h *Handler) updateUserById(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "user id"
-// @Success 200 {object} statusResponse
+// @Success 204 {object} statusResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /user/{id} [delete]
+// @Router /users/{id} [delete]
 func (h *Handler) removeUserById(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -145,5 +145,5 @@ func (h *Handler) removeUserById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{"Removed"})
+	c.JSON(http.StatusNoContent, statusResponse{"Removed"})
 }

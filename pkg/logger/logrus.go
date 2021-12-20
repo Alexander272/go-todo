@@ -17,6 +17,13 @@ func Init(out io.Writer, env string) {
 	logrus.SetOutput(out)
 }
 
+func Trace(msg ...interface{}) {
+	logrus.Trace(msg...)
+}
+func Tracef(format string, msg ...interface{}) {
+	logrus.Tracef(format, msg...)
+}
+
 func Debug(msg ...interface{}) {
 	logrus.Debug(msg...)
 }

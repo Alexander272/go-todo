@@ -5,6 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type dataResponse struct {
+	Data  interface{} `json:"data"`
+	Count int64       `json:"count,omitempty"`
+}
+
+type idResponse struct {
+	Id      string `json:"id,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
 type errorResponse struct {
 	Message string `json:"message"`
 }

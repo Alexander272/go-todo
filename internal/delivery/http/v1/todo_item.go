@@ -3,16 +3,14 @@ package v1
 import (
 	"fmt"
 	"net/http"
-	"time"
 
-	"github.com/Alexander272/go-todo/internal/service"
+	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (h *Handler) initItemRoutes(api *gin.RouterGroup) {
-	api.GET("/:listId/todo", h.userIdentity, h.getItemsByListId)
-	todo := api.Group("/todo", h.userIdentity)
+	api.GET("/:listId/todos", h.userIdentity, h.getItemsByListId)
+	todo := api.Group("/todos", h.userIdentity)
 	{
 		todo.POST("/", h.createItem)
 		todo.GET("/all", h.getAllItems)
@@ -29,49 +27,25 @@ func (h *Handler) initItemRoutes(api *gin.RouterGroup) {
 // @ModuleID getItemsByListId
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} domain.TodoItem
+// @Success 200 {object} dataResponse{data=[]domain.TodoItem}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /{listId}/todo [get]
+// @Router /{listId}/todos [get]
 func (h *Handler) getItemsByListId(c *gin.Context) {
-	id := c.Param("listId")
-	if id == "" {
+	listId := c.Param("listId")
+	if listId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
 		return
 	}
-	listId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
-	ctxId, exists := c.Get(userIdCtx)
-	if !exists {
-		newErrorResponse(c, http.StatusForbidden, "access not allowed")
-		return
-	}
-	userId, err := primitive.ObjectIDFromHex(fmt.Sprintf("%v", ctxId))
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	lists, err := h.services.TodoItem.GetItemsByListId(c, userId, listId)
+	lists, err := h.services.TodoItem.GetByListId(c, listId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, lists)
-}
-
-type CreateTodo struct {
-	ListId      primitive.ObjectID `json:"listId" binding:"required"`
-	Title       string             `json:"title" binding:"required,min=3,max=128"`
-	Description string             `json:"description"`
-	DeadlineAt  time.Time          `json:"deadlineAt"`
-	Priority    int                `json:"priority"`
-	Tags        []string           `json:"tags"`
+	c.JSON(http.StatusOK, dataResponse{Data: lists})
 }
 
 // @Summary Create Item
@@ -81,44 +55,27 @@ type CreateTodo struct {
 // @ModuleID createItem
 // @Accept  json
 // @Produce  json
-// @Param input body CreateTodo true "todo info"
-// @Success 201 {object} statusResponse
+// @Param input body domain.CreateTodoDTO true "todo info"
+// @Success 201 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /todo/ [post]
+// @Router /todos/ [post]
 func (h *Handler) createItem(c *gin.Context) {
-	ctxId, exists := c.Get(userIdCtx)
-	if !exists {
-		newErrorResponse(c, http.StatusForbidden, "access not allowed")
-		return
-	}
-	userId, err := primitive.ObjectIDFromHex(fmt.Sprintf("%v", ctxId))
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
-
-	var input CreateTodo
-	if err := c.BindJSON(&input); err != nil {
+	var dto domain.CreateTodoDTO
+	if err := c.BindJSON(&dto); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
-	if err := h.services.TodoItem.CreateItem(c, service.CreateTodoItem{
-		UserId:      userId,
-		ListId:      input.ListId,
-		Title:       input.Title,
-		Description: input.Description,
-		DeadlineAt:  input.DeadlineAt,
-		Priority:    input.Priority,
-		Tags:        input.Tags,
-	}); err != nil {
+	id, err := h.services.TodoItem.Create(c, dto)
+	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, statusResponse{"Created"})
+	c.Header("Location", fmt.Sprintf("/api/v1/todos/%s", id))
+	c.JSON(http.StatusCreated, idResponse{Id: id, Message: "Created"})
 }
 
 // @Summary Get All Items
@@ -128,30 +85,25 @@ func (h *Handler) createItem(c *gin.Context) {
 // @ModuleID getAllItems
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} domain.TodoItem
+// @Success 200 {object} dataResponse{data=[]domain.TodoItem}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /todo/all [get]
+// @Router /todos/all [get]
 func (h *Handler) getAllItems(c *gin.Context) {
-	ctxId, exists := c.Get(userIdCtx)
+	userId, exists := c.Get(userIdCtx)
 	if !exists {
 		newErrorResponse(c, http.StatusForbidden, "access not allowed")
 		return
 	}
-	userId, err := primitive.ObjectIDFromHex(fmt.Sprintf("%v", ctxId))
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	items, err := h.services.TodoItem.GetItemsByUserId(c, userId)
+	items, err := h.services.TodoItem.GetByUserId(c, userId.(string))
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, dataResponse{Data: items})
 }
 
 // @Summary Get Item By Id
@@ -162,40 +114,25 @@ func (h *Handler) getAllItems(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "todo id"
-// @Success 200 {object} domain.TodoItem
+// @Success 200 {object} dataResponse{data=domain.TodoItem}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /todo/{id} [get]
 func (h *Handler) getItemById(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	itemId := c.Param("id")
+	if itemId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
 		return
 	}
-	itemId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	item, err := h.services.TodoItem.GetItemsById(c, itemId)
+	item, err := h.services.TodoItem.GetById(c, itemId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, item)
-}
-
-type UpdateTodo struct {
-	ListId      primitive.ObjectID `json:"listId" binding:"required"`
-	Title       string             `json:"title"`
-	Description string             `json:"description"`
-	DeadlineAt  time.Time          `json:"deadlineAt"`
-	Priority    int                `json:"priority"`
-	Done        bool               `json:"done"`
-	Tags        []string           `json:"tags"`
+	c.JSON(http.StatusOK, dataResponse{Data: item})
 }
 
 // @Summary Update Item
@@ -206,45 +143,31 @@ type UpdateTodo struct {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "todo id"
-// @Param input body UpdateTodo true "todo info"
-// @Success 200 {object} statusResponse
+// @Param input body domain.UpdateTodoDTO true "todo info"
+// @Success 200 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /todo/{id} [put]
 func (h *Handler) updateItem(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	itemId := c.Param("id")
+	if itemId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
 		return
 	}
-	itemId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	var input UpdateTodo
-	if err := c.BindJSON(&input); err != nil {
+	var dto domain.UpdateTodoDTO
+	if err := c.BindJSON(&dto); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
-	if err := h.services.TodoItem.UpdateItem(c, service.UpdateTodoItem{
-		Id:          itemId,
-		ListId:      input.ListId,
-		Title:       input.Title,
-		Description: input.Description,
-		DeadlineAt:  input.DeadlineAt,
-		Priority:    input.Priority,
-		Done:        input.Done,
-		Tags:        input.Tags,
-	}); err != nil {
+	if err := h.services.TodoItem.Update(c, dto); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{"Updated"})
+	c.JSON(http.StatusOK, idResponse{Id: itemId, Message: "Updated"})
 }
 
 // @Summary Remove Item
@@ -255,27 +178,22 @@ func (h *Handler) updateItem(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "todo id"
-// @Success 200 {object} statusResponse
+// @Success 204 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /todo/{id} [delete]
 func (h *Handler) removeItem(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	itemId := c.Param("id")
+	if itemId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
 		return
 	}
-	itemId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	if err := h.services.TodoItem.RemoveItem(c, itemId); err != nil {
+	if err := h.services.TodoItem.Remove(c, itemId); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{"Deleted"})
+	c.JSON(http.StatusNoContent, idResponse{Message: "Deleted"})
 }
