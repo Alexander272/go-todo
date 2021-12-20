@@ -5,19 +5,18 @@ import (
 
 	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/go-redis/redis/v8"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Users interface {
-	Create(ctx context.Context, user domain.User) error
-	GetByEmail(ctx context.Context, email string) (*domain.User, error)
-	Verify(ctx context.Context, userId primitive.ObjectID, code string) error
-	SetSession(ctx context.Context, userId primitive.ObjectID) error
-	GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error)
-	UpdateById(ctx context.Context, userId primitive.ObjectID, user domain.UserUpdate) error
-	RemoveById(ctx context.Context, userId primitive.ObjectID) error
-	GetAllUsers(ctx context.Context) ([]domain.User, error)
+	Create(ctx context.Context, user domain.User) (string, error)
+	GetAll(ctx context.Context) ([]domain.User, error)
+	Verify(ctx context.Context, userId string, code string) error
+	SetSession(ctx context.Context, userId string) error
+	GetByEmail(ctx context.Context, email string) (domain.User, error)
+	GetById(ctx context.Context, userId string) (domain.User, error)
+	Update(ctx context.Context, user domain.User) error
+	Remove(ctx context.Context, userId string) error
 }
 
 type Auth interface {

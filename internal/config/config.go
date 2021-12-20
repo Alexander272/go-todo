@@ -15,6 +15,7 @@ type (
 		Redis       RedisConfig
 		Auth        AuthConfig
 		Http        HttpConfig
+		Limiter     LimiterConfig
 	}
 
 	MongoConfig struct {
@@ -57,6 +58,12 @@ type (
 		WriteTimeout       time.Duration `mapstructure:"writeTimeout"`
 		MaxHeaderMegabytes int           `mapstructure:"maxHeaderBytes"`
 	}
+
+	LimiterConfig struct {
+		RPS   int           `mapstructure:"rps"`
+		Burst int           `mapstructure:"burst"`
+		TTL   time.Duration `mapstructure:"ttl"`
+	}
 )
 
 func Init(configDir string) (*Config, error) {
@@ -94,6 +101,9 @@ func unmarhal(conf *Config) error {
 		return err
 	}
 	if err := viper.UnmarshalKey("http", &conf.Http); err != nil {
+		return err
+	}
+	if err := viper.UnmarshalKey("limiter", &conf.Limiter); err != nil {
 		return err
 	}
 	if err := viper.UnmarshalKey("auth", &conf.Auth.JWT); err != nil {

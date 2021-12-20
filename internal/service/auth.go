@@ -43,7 +43,7 @@ func (s *AuthService) SignIn(ctx context.Context, input SignInInput, ua, ip stri
 		return nil, nil, errors.New("invalid credentials")
 	}
 
-	accessToken, err := s.tokenManager.NewJWT(user.Id.Hex(), user.Email, user.Role, s.accessTokenTTL)
+	accessToken, err := s.tokenManager.NewJWT(user.Id, user.Email, user.Role, s.accessTokenTTL)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -53,7 +53,7 @@ func (s *AuthService) SignIn(ctx context.Context, input SignInInput, ua, ip stri
 	}
 
 	if err := s.repoAuth.CreateSession(refreshToken, repository.RedisData{
-		UserId: user.Id.Hex(),
+		UserId: user.Id,
 		Email:  user.Email,
 		Role:   user.Role,
 		Ua:     ua,

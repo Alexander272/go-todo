@@ -1,11 +1,11 @@
 package v1
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (h *Handler) initUserRoutes(api *gin.RouterGroup) {
@@ -13,14 +13,18 @@ func (h *Handler) initUserRoutes(api *gin.RouterGroup) {
 	{
 		user.GET("/all", h.getAllUsers)
 		user.GET("/:id", h.getUserById)
-		user.PUT("/:id", h.updateUserById)
-		user.DELETE("/:id", h.removeUserById)
+		user.PUT("/:id", h.updateUser)
+		user.DELETE("/:id", h.removeUser)
 	}
 }
 
 func (h *Handler) getAllUsers(c *gin.Context) {
-	users, err := h.services.User.GetAllUsers(c)
+	users, err := h.services.User.GetAll(c)
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -33,86 +37,73 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 // @Tags user
 // @Description получение данных пользователя
 // @ModuleID getUserById
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path string true "user id"
-// @Success 200 {object} domain.User
+// @Success 200 {object} dataResponse{data=domain.User}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /users/{id} [get]
 func (h *Handler) getUserById(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	userId := c.Param("id")
+	if userId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
-		return
-	}
-	userId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	user, err := h.services.User.GetById(c, userId)
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, dataResponse{Data: user})
 }
 
-type UserUpdateInput struct {
-	Name     string `form:"name" json:"name"`
-	Email    string `form:"email" json:"email"`
-	Password string `form:"password" json:"password"`
-	UserUrl  string `form:"userUrl" json:"userUrl"`
-	Role     string `form:"role" json:"role"`
-}
-
-// @Summary Update User By Id
+// @Summary Update User
 // @Security ApiKeyAuth
 // @Tags user
 // @Description обновление данных пользователя по его id
-// @ModuleID updateUserById
-// @Accept  json
-// @Produce  json
+// @ModuleID updateUser
+// @Accept json
+// @Produce json
 // @Param id path string true "user id"
-// @Param input body UserUpdateInput true "user info"
-// @Success 200 {object} statusResponse
+// @Param input body domain.UpdateUserDTO true "user info"
+// @Success 200 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /users/{id} [put]
-func (h *Handler) updateUserById(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+func (h *Handler) updateUser(c *gin.Context) {
+	userId := c.Param("id")
+	if userId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
 		return
 	}
-	userId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
-	var input UserUpdateInput
-	if err := c.Bind(&input); err != nil {
+
+	var dto domain.UpdateUserDTO
+	if err := c.Bind(&dto); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	dto.UserId = userId
 
-	err = h.services.User.UpdateById(c, userId, domain.UserUpdate{
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: input.Password,
-		Role:     input.Role,
-	})
+	err := h.services.User.Update(c, dto)
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{"Updated"})
+	c.JSON(http.StatusOK, idResponse{Id: userId, Message: "Updated"})
 }
 
 // @Summary Remove User By Id
@@ -123,27 +114,26 @@ func (h *Handler) updateUserById(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "user id"
-// @Success 204 {object} statusResponse
+// @Success 204 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /users/{id} [delete]
-func (h *Handler) removeUserById(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+func (h *Handler) removeUser(c *gin.Context) {
+	userId := c.Param("id")
+	if userId == "" {
 		newErrorResponse(c, http.StatusBadRequest, "empty id param")
 		return
 	}
-	userId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
 
-	if err = h.services.User.RemoveById(c, userId); err != nil {
+	if err := h.services.User.Remove(c, userId); err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusNoContent, statusResponse{"Removed"})
+	c.JSON(http.StatusNoContent, idResponse{Message: "Removed"})
 }

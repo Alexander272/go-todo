@@ -7,6 +7,7 @@ import (
 	"github.com/Alexander272/go-todo/internal/config"
 	v1 "github.com/Alexander272/go-todo/internal/delivery/http/v1"
 	"github.com/Alexander272/go-todo/internal/service"
+	"github.com/Alexander272/go-todo/pkg/limiter"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -28,12 +29,13 @@ func (h *Handler) Init(conf *config.Config) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(
+		limiter.Limit(conf.Limiter.RPS, conf.Limiter.Burst, conf.Limiter.TTL),
 		cors.New(cors.Config{
-			AllowedOrigins: []string{conf.Http.Host},
-			AllowedMethods: []string{"GET"},
-			AllowedHeaders: []string{"Origin"},
-			ExposedHeaders: []string{"Content-Length"},
-			// AllowCredentials: true,
+			AllowedOrigins:   []string{conf.Http.Host},
+			AllowedMethods:   []string{"GET"},
+			AllowedHeaders:   []string{"Origin"},
+			ExposedHeaders:   []string{"Content-Length"},
+			AllowCredentials: true,
 		}),
 	)
 

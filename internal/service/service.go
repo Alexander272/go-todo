@@ -9,16 +9,10 @@ import (
 	"github.com/Alexander272/go-todo/internal/repository"
 	"github.com/Alexander272/go-todo/pkg/auth"
 	"github.com/Alexander272/go-todo/pkg/hash"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const CookieName = "session"
 
-type SignUpInput struct {
-	Name     string
-	Email    string
-	Password string
-}
 type SignInInput struct {
 	Email    string
 	Password string
@@ -36,11 +30,11 @@ type Auth interface {
 }
 
 type User interface {
-	SignUp(ctx context.Context, input SignUpInput) error
-	GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error)
-	UpdateById(ctx context.Context, userId primitive.ObjectID, user domain.UserUpdate) error
-	RemoveById(ctx context.Context, userId primitive.ObjectID) error
-	GetAllUsers(ctx context.Context) ([]domain.User, error)
+	SignUp(ctx context.Context, dto domain.CreateUserDTO) (string, error)
+	GetAll(ctx context.Context) ([]domain.User, error)
+	GetById(ctx context.Context, userId string) (domain.User, error)
+	Update(ctx context.Context, dto domain.UpdateUserDTO) error
+	Remove(ctx context.Context, userId string) error
 }
 
 type Category interface {

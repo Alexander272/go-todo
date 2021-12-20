@@ -31,24 +31,21 @@ type SignUpInput struct {
 // @ModuleID userSignUp
 // @Accept  json
 // @Produce  json
-// @Param input body SignUpInput true "sign up info"
-// @Success 201 {object} statusResponse
+// @Param input body domain.CreateUserDTO true "sign up info"
+// @Success 201 {object} idResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
-	var inp SignUpInput
-	if err := c.BindJSON(&inp); err != nil {
+	var dto domain.CreateUserDTO
+	if err := c.BindJSON(&dto); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
-	if err := h.services.User.SignUp(c.Request.Context(), service.SignUpInput{
-		Name:     inp.Name,
-		Email:    inp.Email,
-		Password: inp.Password,
-	}); err != nil {
+	id, err := h.services.User.SignUp(c, dto)
+	if err != nil {
 		if errors.Is(err, domain.ErrUserAlreadyExists) {
 			newErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
@@ -57,7 +54,7 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, statusResponse{"Created"})
+	c.JSON(http.StatusCreated, idResponse{Id: id, Message: "Created"})
 }
 
 type SignInInput struct {
@@ -89,7 +86,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	ua := c.GetHeader("sec-ch-ua") + " " + c.GetHeader("sec-ch-ua-platform") + " " + c.GetHeader("User-Agent")
 	ip := c.ClientIP()
 
-	cookie, token, err := h.services.Auth.SignIn(c.Request.Context(), service.SignInInput{
+	cookie, token, err := h.services.Auth.SignIn(c, service.SignInInput{
 		Email:    inp.Email,
 		Password: inp.Password,
 	}, ua, ip)

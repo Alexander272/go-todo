@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Alexander272/go-todo/internal/domain"
@@ -22,25 +23,37 @@ func NewUsersRepo(db *mongo.Database) *UsersRepo {
 	}
 }
 
-func (r *UsersRepo) Create(ctx context.Context, user domain.User) error {
-	_, err := r.db.InsertOne(ctx, user)
-	return err
-}
-
-func (r *UsersRepo) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	var user *domain.User
-	if err := r.db.FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, domain.ErrUserNotFound
-		}
-
-		return nil, err
+func (r *UsersRepo) Create(ctx context.Context, user domain.User) (id string, err error) {
+	res, err := r.db.InsertOne(ctx, user)
+	if err != nil {
+		return id, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
-	return user, nil
+	oid, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return id, fmt.Errorf("failed to convert objectid")
+	}
+	logger.Tracef("Created document with oid %s.\n", oid)
+	return oid.Hex(), nil
 }
 
-func (r *UsersRepo) Verify(ctx context.Context, userId primitive.ObjectID, code string) error {
+func (r *UsersRepo) GetAll(ctx context.Context) (users []domain.User, err error) {
+	filter := bson.M{}
+	cur, err := r.db.Find(ctx, filter)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return users, domain.ErrUserNotFound
+		}
+		return users, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if err := cur.All(ctx, &users); err != nil {
+		return users, fmt.Errorf("failed to decode document. error: %w", err)
+	}
+
+	return users, nil
+}
+
+func (r *UsersRepo) Verify(ctx context.Context, userId, code string) error {
 	res, err := r.db.UpdateOne(ctx,
 		bson.M{"verification.code": code, "_id": userId},
 		bson.M{"$set": bson.M{"verification.verified": true, "verification.code": ""}})
@@ -55,64 +68,111 @@ func (r *UsersRepo) Verify(ctx context.Context, userId primitive.ObjectID, code 
 	return nil
 }
 
-func (r *UsersRepo) SetSession(ctx context.Context, userId primitive.ObjectID) error {
-	_, err := r.db.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": bson.M{"lastVisitAt": time.Now()}})
+func (r *UsersRepo) SetSession(ctx context.Context, userId string) error {
+	oid, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
 
-	return err
+	filter := bson.M{"_id": oid}
+	updateObj := bson.M{"$set": bson.M{"lastVisitAt": time.Now().Unix()}}
+
+	res, err := r.db.UpdateOne(ctx, filter, updateObj)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if res.MatchedCount == 0 {
+		return domain.ErrUserNotFound
+	}
+
+	logger.Tracef("Matched %v documents and updated %v documents.\n", res.MatchedCount, res.ModifiedCount)
+	return nil
 }
 
-func (r *UsersRepo) GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error) {
-	var user domain.User
-	if err := r.db.FindOne(ctx, bson.M{"_id": userId}).Decode(&user); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return domain.User{}, domain.ErrUserNotFound
+func (r *UsersRepo) GetByEmail(ctx context.Context, email string) (user domain.User, err error) {
+	filter := bson.M{"email": email}
+	res := r.db.FindOne(ctx, filter)
+	if res.Err() != nil {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+			return user, domain.ErrUserNotFound
 		}
-
-		return domain.User{}, err
+		return user, fmt.Errorf("failed to execute query. error: %w", res.Err())
 	}
+	if err := res.Decode(&user); err != nil {
+		return user, fmt.Errorf("failed to decode document. error: %w", err)
+	}
+
 	return user, nil
 }
 
-func (r *UsersRepo) UpdateById(ctx context.Context, userId primitive.ObjectID, user domain.UserUpdate) error {
-	update := bson.M{}
-	if user.Name != "" {
-		update["name"] = user.Name
-	}
-	if user.Email != "" {
-		update["email"] = user.Email
-	}
-	if user.Password != "" {
-		update["password"] = user.Password
-	}
-	if user.Role != "" {
-		update["role"] = user.Role
-	}
-	if user.UserUrl != "" {
-		update["userUrl"] = user.UserUrl
-	}
-	logger.Debug(user)
-
-	_, err := r.db.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": update})
-	return err
-}
-
-func (r *UsersRepo) RemoveById(ctx context.Context, userId primitive.ObjectID) error {
-	_, err := r.db.DeleteOne(ctx, bson.M{"_id": userId})
-	return err
-}
-
-func (r *UsersRepo) GetAllUsers(ctx context.Context) ([]domain.User, error) {
-	cursor, err := r.db.Find(ctx, bson.M{})
+func (r *UsersRepo) GetById(ctx context.Context, userId string) (user domain.User, err error) {
+	oid, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, nil
-		}
-		return nil, err
+		return user, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
 	}
 
-	var users []domain.User
-	if err := cursor.All(ctx, &users); err != nil {
-		return nil, err
+	filter := bson.M{"_id": oid}
+	res := r.db.FindOne(ctx, filter)
+	if res.Err() != nil {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+			return user, domain.ErrUserNotFound
+		}
+		return user, fmt.Errorf("failed to execute query. error: %w", res.Err())
 	}
-	return users, nil
+	if err := res.Decode(&user); err != nil {
+		return user, fmt.Errorf("failed to decode document. error: %w", err)
+	}
+
+	return user, nil
+}
+
+func (r *UsersRepo) Update(ctx context.Context, user domain.User) error {
+	oid, err := primitive.ObjectIDFromHex(user.Id)
+	if err != nil {
+		return fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
+
+	filter := bson.M{"_id": oid}
+	userByte, err := bson.Marshal(user)
+	if err != nil {
+		return fmt.Errorf("failed to marshal document. error: %w", err)
+	}
+
+	var updateObj bson.M
+	if err := bson.Unmarshal(userByte, &updateObj); err != nil {
+		return fmt.Errorf("failed to unmarshal document. error: %w", err)
+	}
+
+	delete(updateObj, "_id")
+	update := bson.M{"$set": updateObj}
+
+	res, err := r.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if res.MatchedCount == 0 {
+		return domain.ErrUserNotFound
+	}
+
+	logger.Tracef("Matched %v documents and updated %v documents.\n", res.MatchedCount, res.ModifiedCount)
+	return nil
+}
+
+func (r *UsersRepo) Remove(ctx context.Context, userId string) error {
+	oid, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return fmt.Errorf("failed to convert hex to objectid. error: %w", err)
+	}
+
+	filter := bson.M{"_id": oid}
+	res, err := r.db.DeleteOne(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if res.DeletedCount == 0 {
+		return domain.ErrUserNotFound
+	}
+
+	logger.Tracef("Delete %v documents.\n", res.DeletedCount)
+	return nil
 }

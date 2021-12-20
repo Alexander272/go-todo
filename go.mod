@@ -80,5 +80,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
+	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11
 	gopkg.in/ini.v1 v1.63.2 // indirect
 )
