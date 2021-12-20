@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/Alexander272/go-todo/pkg/logger"
@@ -23,6 +24,9 @@ func NewTodoItemRepo(db *mongo.Database) *TodoItemRepo {
 }
 
 func (r *TodoItemRepo) Create(ctx context.Context, item domain.TodoItem) (id string, err error) {
+	item.Done = false
+	item.CreatedAt = time.Now().Unix()
+
 	res, err := r.db.InsertOne(ctx, item)
 	if err != nil {
 		return id, fmt.Errorf("failed to execute query. error: %w", err)
@@ -37,12 +41,7 @@ func (r *TodoItemRepo) Create(ctx context.Context, item domain.TodoItem) (id str
 }
 
 func (r *TodoItemRepo) GetByListId(ctx context.Context, listId string) (items []domain.TodoItem, err error) {
-	oid, err := primitive.ObjectIDFromHex(listId)
-	if err != nil {
-		return items, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
-	}
-
-	filter := bson.M{"listId": oid}
+	filter := bson.M{"listId": listId}
 	cursor, err := r.db.Find(ctx, filter)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -59,12 +58,7 @@ func (r *TodoItemRepo) GetByListId(ctx context.Context, listId string) (items []
 
 // а нужен ли этот запрос?
 func (r *TodoItemRepo) GetByUserId(ctx context.Context, userId string) (items []domain.TodoItem, err error) {
-	oid, err := primitive.ObjectIDFromHex(userId)
-	if err != nil {
-		return items, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
-	}
-
-	filter := bson.M{"userId": oid}
+	filter := bson.M{"userId": userId}
 	cursor, err := r.db.Find(ctx, filter)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -101,12 +95,7 @@ func (r *TodoItemRepo) GetById(ctx context.Context, itemId string) (item domain.
 }
 
 func (r *TodoItemRepo) GetByTitle(ctx context.Context, listId string, title string) (item domain.TodoItem, err error) {
-	oid, err := primitive.ObjectIDFromHex(listId)
-	if err != nil {
-		return item, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
-	}
-
-	filter := bson.M{"listId": oid, "title": title}
+	filter := bson.M{"listId": listId, "title": title}
 	res := r.db.FindOne(ctx, filter)
 	if res.Err() != nil {
 		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
@@ -173,13 +162,8 @@ func (r *TodoItemRepo) Remove(ctx context.Context, itemId string) error {
 }
 
 func (r *TodoItemRepo) RemoveByListId(ctx context.Context, listId string) error {
-	oid, err := primitive.ObjectIDFromHex(listId)
-	if err != nil {
-		return fmt.Errorf("failed to convert hex to objectid. error: %w", err)
-	}
-
-	filter := bson.M{"listId": oid}
-	res, err := r.db.DeleteOne(ctx, filter)
+	filter := bson.M{"listId": listId}
+	res, err := r.db.DeleteMany(ctx, filter)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

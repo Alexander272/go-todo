@@ -43,12 +43,20 @@ type User interface {
 	GetAllUsers(ctx context.Context) ([]domain.User, error)
 }
 
+type Category interface {
+	Create(ctx context.Context, dto domain.CreateCategoryDTO) (string, error)
+	GetAll(ctx context.Context, userId string) ([]domain.Category, error)
+	GetWithLists(ctx context.Context, userId string) ([]domain.CategoryWithLists, error)
+	Update(ctx context.Context, dto domain.UpdateCategoryDTO) error
+	Remove(ctx context.Context, categoryId string) error
+}
+
 type TodoList interface {
-	CreateList(ctx context.Context, dto domain.CreateListDTO) (string, error)
-	GetAllLists(ctx context.Context, userId string) ([]domain.TodoList, error)
-	GetListById(ctx context.Context, listId string) (domain.TodoList, error)
-	UpdateList(ctx context.Context, listId string, dto domain.UpdateListDTO) error
-	RemoveList(ctx context.Context, listId string) error
+	Create(ctx context.Context, dto domain.CreateListDTO) (string, error)
+	GetAll(ctx context.Context, userId string) ([]domain.TodoList, error)
+	GetById(ctx context.Context, listId string) (domain.TodoList, error)
+	Update(ctx context.Context, dto domain.UpdateListDTO) error
+	Remove(ctx context.Context, listId string) error
 }
 
 type TodoItem interface {
@@ -63,6 +71,7 @@ type TodoItem interface {
 type Services struct {
 	Auth
 	User
+	Category
 	TodoList
 	TodoItem
 }
@@ -81,6 +90,7 @@ func NewServices(deps Deps) *Services {
 	return &Services{
 		Auth:     NewAuthService(deps.Repos.Users, deps.Repos.Auth, deps.TokenManager, deps.Hasher, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.Domain),
 		User:     NewUserService(deps.Repos.Users, deps.TokenManager, deps.Hasher),
+		Category: NewCategoryService(deps.Repos.Category, deps.Repos.TodoList),
 		TodoList: NewTodoListService(deps.Repos.TodoList, deps.Repos.TodoItem),
 		TodoItem: NewTodoItemService(deps.Repos.TodoItem),
 	}

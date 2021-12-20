@@ -26,11 +26,21 @@ type Auth interface {
 	RemoveSession(token string) error
 }
 
+type Category interface {
+	Create(ctx context.Context, cat domain.Category) (string, error)
+	GetAll(ctx context.Context, userId string) ([]domain.Category, error)
+	GetWithLists(ctx context.Context, userId string) ([]domain.CategoryWithLists, error)
+	GetByTitle(ctx context.Context, userId, title string) (domain.Category, error)
+	Update(ctx context.Context, category domain.Category) error
+	Remove(ctx context.Context, categoryId string) error
+}
+
 type TodoList interface {
 	Create(ctx context.Context, list domain.TodoList) (string, error)
 	GetAll(ctx context.Context, userId string) ([]domain.TodoList, error)
 	GetById(ctx context.Context, listId string) (domain.TodoList, error)
 	GetByTitle(ctx context.Context, userId string, title string) (domain.TodoList, error)
+	RemoveCatogoryId(ctx context.Context, categoryId string) error
 	Update(ctx context.Context, list domain.TodoList) error
 	Remove(ctx context.Context, listId string) error
 }
@@ -49,6 +59,7 @@ type TodoItem interface {
 type Repositories struct {
 	Users
 	Auth
+	Category
 	TodoList
 	TodoItem
 }
@@ -57,6 +68,7 @@ func NewRepositories(db *mongo.Database, client *redis.Client) *Repositories {
 	return &Repositories{
 		Auth:     NewAuthRepo(client),
 		Users:    NewUsersRepo(db),
+		Category: NewCategoryRepo(db),
 		TodoList: NewTodoListRepo(db),
 		TodoItem: NewTodoItemRepo(db),
 	}

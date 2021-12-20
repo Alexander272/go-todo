@@ -50,6 +50,7 @@ type (
 	}
 
 	HttpConfig struct {
+		Domain             string        `mapstructure:"domain"`
 		Host               string        `mapstructure:"host"`
 		Port               string        `mapstructure:"port"`
 		ReadTimeout        time.Duration `mapstructure:"readTimeout"`

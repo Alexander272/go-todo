@@ -21,7 +21,7 @@ func NewTodoListService(repo repository.TodoList, repoItem repository.TodoItem) 
 	}
 }
 
-func (s *TodoListServise) CreateList(ctx context.Context, dto domain.CreateListDTO) (id string, err error) {
+func (s *TodoListServise) Create(ctx context.Context, dto domain.CreateListDTO) (id string, err error) {
 	candidate, err := s.repo.GetByTitle(ctx, dto.UserId, dto.Title)
 	if err != nil {
 		if !errors.Is(err, domain.ErrListNotFound) {
@@ -34,10 +34,15 @@ func (s *TodoListServise) CreateList(ctx context.Context, dto domain.CreateListD
 
 	list := domain.NewTodoList(dto)
 
-	return s.repo.Create(ctx, list)
+	id, err = s.repo.Create(ctx, list)
+	if err != nil {
+		return id, fmt.Errorf("failed to create list. error: %w", err)
+	}
+
+	return id, nil
 }
 
-func (s *TodoListServise) GetAllLists(ctx context.Context, userId string) (lists []domain.TodoList, err error) {
+func (s *TodoListServise) GetAll(ctx context.Context, userId string) (lists []domain.TodoList, err error) {
 	lists, err = s.repo.GetAll(ctx, userId)
 	if err != nil {
 		if errors.Is(err, domain.ErrListNotFound) {
@@ -52,7 +57,7 @@ func (s *TodoListServise) GetAllLists(ctx context.Context, userId string) (lists
 	return lists, nil
 }
 
-func (s *TodoListServise) GetListById(ctx context.Context, listId string) (list domain.TodoList, err error) {
+func (s *TodoListServise) GetById(ctx context.Context, listId string) (list domain.TodoList, err error) {
 	list, err = s.repo.GetById(ctx, listId)
 	if err != nil {
 		if errors.Is(err, domain.ErrListNotFound) {
@@ -64,7 +69,7 @@ func (s *TodoListServise) GetListById(ctx context.Context, listId string) (list 
 	return list, nil
 }
 
-func (s *TodoListServise) UpdateList(ctx context.Context, listId string, dto domain.UpdateListDTO) error {
+func (s *TodoListServise) Update(ctx context.Context, dto domain.UpdateListDTO) error {
 	updateList := domain.UpdateTodoList(dto)
 	err := s.repo.Update(ctx, updateList)
 	if err != nil {
@@ -76,13 +81,15 @@ func (s *TodoListServise) UpdateList(ctx context.Context, listId string, dto dom
 	return nil
 }
 
-func (s *TodoListServise) RemoveList(ctx context.Context, listId string) error {
-	// err := s.repoItem.RemoveByListId(ctx, listId)
-	// if err != nil {
-	// 	return err
-	// }
-	// return s.repo.Remove(ctx, listId)
-	err := s.repo.Remove(ctx, listId)
+func (s *TodoListServise) Remove(ctx context.Context, listId string) error {
+	err := s.repoItem.RemoveByListId(ctx, listId)
+	if err != nil {
+		if !errors.Is(err, domain.ErrItemNotFound) {
+			return fmt.Errorf("failed to remove items by listid. error: %w", err)
+		}
+	}
+
+	err = s.repo.Remove(ctx, listId)
 	if err != nil {
 		if errors.Is(err, domain.ErrListNotFound) {
 			return err

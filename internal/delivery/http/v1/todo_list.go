@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -24,8 +25,8 @@ func (h *Handler) initListRoutes(api *gin.RouterGroup) {
 // @Tags list
 // @Description получение всех пользовательских списков
 // @ModuleID getAllLists
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Success 200 {object} dataResponse{data=[]domain.TodoList}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
@@ -38,8 +39,12 @@ func (h *Handler) getAllLists(c *gin.Context) {
 		return
 	}
 
-	lists, err := h.services.TodoList.GetAllLists(c, userId.(string))
+	lists, err := h.services.TodoList.GetAll(c, userId.(string))
 	if err != nil {
+		if errors.Is(err, domain.ErrListNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -52,8 +57,8 @@ func (h *Handler) getAllLists(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Description создание списка
 // @ModuleID createList
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param input body domain.CreateListDTO true "list info"
 // @Success 201 {object} idResponse
 // @Failure 400,404 {object} errorResponse
@@ -74,7 +79,7 @@ func (h *Handler) createList(c *gin.Context) {
 	}
 	dto.UserId = userId.(string)
 
-	id, err := h.services.TodoList.CreateList(c, dto)
+	id, err := h.services.TodoList.Create(c, dto)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -89,8 +94,8 @@ func (h *Handler) createList(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Description получение данных списка
 // @ModuleID getListById
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path string true "list id"
 // @Success 200 {object} dataResponse{data=domain.TodoList}
 // @Failure 400,404 {object} errorResponse
@@ -104,8 +109,12 @@ func (h *Handler) getListById(c *gin.Context) {
 		return
 	}
 
-	list, err := h.services.TodoList.GetListById(c, listId)
+	list, err := h.services.TodoList.GetById(c, listId)
 	if err != nil {
+		if errors.Is(err, domain.ErrListNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -118,8 +127,8 @@ func (h *Handler) getListById(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Description обновление данных списка
 // @ModuleID updateList
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path string true "list id"
 // @Param input body domain.UpdateListDTO true "list info"
 // @Success 200 {object} idResponse
@@ -139,8 +148,13 @@ func (h *Handler) updateList(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
+	dto.Id = listId
 
-	if err := h.services.TodoList.UpdateList(c, listId, dto); err != nil {
+	if err := h.services.TodoList.Update(c, dto); err != nil {
+		if errors.Is(err, domain.ErrListNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -153,8 +167,8 @@ func (h *Handler) updateList(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Description удаление списка
 // @ModuleID removeList
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path string true "list id"
 // @Success 204 {object} idResponse
 // @Failure 400,404 {object} errorResponse
@@ -168,7 +182,11 @@ func (h *Handler) removeList(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.TodoList.RemoveList(c, listId); err != nil {
+	if err := h.services.TodoList.Remove(c, listId); err != nil {
+		if errors.Is(err, domain.ErrListNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

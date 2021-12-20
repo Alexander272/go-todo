@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/Alexander272/go-todo/pkg/logger"
@@ -23,6 +24,8 @@ func NewTodoListRepo(db *mongo.Database) *TodoListRepo {
 }
 
 func (r *TodoListRepo) Create(ctx context.Context, list domain.TodoList) (id string, err error) {
+	list.CreatedAt = time.Now().Unix()
+
 	res, err := r.db.InsertOne(ctx, list)
 	if err != nil {
 		return id, fmt.Errorf("failed to execute query. error: %w", err)
@@ -36,24 +39,18 @@ func (r *TodoListRepo) Create(ctx context.Context, list domain.TodoList) (id str
 	return oid.Hex(), nil
 }
 
-func (r *TodoListRepo) GetAll(ctx context.Context, userId string) ([]domain.TodoList, error) {
-	oid, err := primitive.ObjectIDFromHex(userId)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert hex to objectid. error: %w", err)
-	}
-
-	filter := bson.M{"userId": oid}
+func (r *TodoListRepo) GetAll(ctx context.Context, userId string) (lists []domain.TodoList, err error) {
+	filter := bson.M{"userId": userId}
 	cursor, err := r.db.Find(ctx, filter)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, domain.ErrListNotFound
+			return lists, domain.ErrListNotFound
 		}
-		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+		return lists, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 
-	var lists []domain.TodoList
 	if err := cursor.All(ctx, &lists); err != nil {
-		return nil, fmt.Errorf("failed to decode document. error: %w", err)
+		return lists, fmt.Errorf("failed to decode document. error: %w", err)
 	}
 	return lists, nil
 }
@@ -93,6 +90,21 @@ func (r *TodoListRepo) GetByTitle(ctx context.Context, userId string, title stri
 	}
 
 	return list, nil
+}
+
+func (r *TodoListRepo) RemoveCatogoryId(ctx context.Context, categoryId string) error {
+	filter := bson.M{"categoryId": categoryId}
+	upfateObj := bson.M{"categoryId": ""}
+	res, err := r.db.UpdateMany(ctx, filter, upfateObj)
+	if err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	if res.MatchedCount == 0 {
+		return domain.ErrListNotFound
+	}
+
+	logger.Tracef("Matched %v documents and updated %v documents.\n", res.MatchedCount, res.ModifiedCount)
+	return nil
 }
 
 func (r *TodoListRepo) Update(ctx context.Context, todo domain.TodoList) error {

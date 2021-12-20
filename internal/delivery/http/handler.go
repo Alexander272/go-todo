@@ -28,8 +28,6 @@ func (h *Handler) Init(conf *config.Config) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(
-		gin.Recovery(),
-		gin.Logger(),
 		cors.New(cors.Config{
 			AllowedOrigins: []string{conf.Http.Host},
 			AllowedMethods: []string{"GET"},

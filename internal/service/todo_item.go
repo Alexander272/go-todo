@@ -31,7 +31,12 @@ func (s *TodoItemService) Create(ctx context.Context, dto domain.CreateTodoDTO) 
 	}
 	item := domain.NewTodo(dto)
 
-	return s.repo.Create(ctx, item)
+	id, err = s.repo.Create(ctx, item)
+	if err != nil {
+		return id, fmt.Errorf("failed to create item. error: %w", err)
+	}
+
+	return id, nil
 }
 
 func (s *TodoItemService) GetByListId(ctx context.Context, listId string) (items []domain.TodoItem, err error) {
