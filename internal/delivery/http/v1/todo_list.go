@@ -15,7 +15,7 @@ func (h *Handler) initListRoutes(api *gin.RouterGroup) {
 		list.GET("/", h.getAllLists)
 		list.POST("/", h.createList)
 		list.GET("/:id", h.getListById)
-		list.PUT("/:id", h.updateList)
+		list.PATCH("/:id", h.updateList)
 		list.DELETE("/:id", h.removeList)
 	}
 }
@@ -81,6 +81,10 @@ func (h *Handler) createList(c *gin.Context) {
 
 	id, err := h.services.TodoList.Create(c, dto)
 	if err != nil {
+		if errors.Is(err, domain.ErrListAlreadyExists) {
+			c.JSON(http.StatusBadRequest, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -135,7 +139,7 @@ func (h *Handler) getListById(c *gin.Context) {
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /lists/{id} [put]
+// @Router /lists/{id} [patch]
 func (h *Handler) updateList(c *gin.Context) {
 	listId := c.Param("id")
 	if listId == "" {

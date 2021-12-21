@@ -24,6 +24,7 @@ func NewUsersRepo(db *mongo.Database) *UsersRepo {
 }
 
 func (r *UsersRepo) Create(ctx context.Context, user domain.User) (id string, err error) {
+	user.RegisteredAt = time.Now().Unix()
 	res, err := r.db.InsertOne(ctx, user)
 	if err != nil {
 		return id, fmt.Errorf("failed to execute query. error: %w", err)

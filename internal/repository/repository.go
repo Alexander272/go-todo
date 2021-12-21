@@ -19,10 +19,10 @@ type Users interface {
 	Remove(ctx context.Context, userId string) error
 }
 
-type Auth interface {
-	CreateSession(token string, data RedisData) error
-	GetDelSession(token string) (*RedisData, error)
-	RemoveSession(token string) error
+type Session interface {
+	CreateSession(ctx context.Context, token string, data SessionData) error
+	GetDelSession(ctx context.Context, token string) (SessionData, error)
+	RemoveSession(ctx context.Context, token string) error
 }
 
 type Category interface {
@@ -57,15 +57,15 @@ type TodoItem interface {
 
 type Repositories struct {
 	Users
-	Auth
+	Session
 	Category
 	TodoList
 	TodoItem
 }
 
-func NewRepositories(db *mongo.Database, client *redis.Client) *Repositories {
+func NewRepositories(db *mongo.Database, client redis.Cmdable) *Repositories {
 	return &Repositories{
-		Auth:     NewAuthRepo(client),
+		Session:  NewSessionRepo(client),
 		Users:    NewUsersRepo(db),
 		Category: NewCategoryRepo(db),
 		TodoList: NewTodoListRepo(db),

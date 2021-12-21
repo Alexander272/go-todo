@@ -83,3 +83,18 @@ require (
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11
 	gopkg.in/ini.v1 v1.63.2 // indirect
 )
+
+require (
+	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
+	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9 // indirect
+)
+
+require (
+	github.com/alicebob/miniredis/v2 v2.14.1
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/elliotchance/redismock/v8 v8.6.2
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/objx v0.1.1 // indirect
+	github.com/stretchr/testify v1.7.0
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+)

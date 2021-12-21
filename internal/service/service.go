@@ -22,10 +22,10 @@ type Token struct {
 	RefreshToken string
 }
 
-type Auth interface {
+type Session interface {
 	SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *Token, error)
-	SingOut(token string) (*http.Cookie, error)
-	Refresh(token, ua, ip string) (*Token, *http.Cookie, error)
+	SingOut(ctx context.Context, token string) (*http.Cookie, error)
+	Refresh(ctx context.Context, token, ua, ip string) (*Token, *http.Cookie, error)
 	TokenParse(token string) (userId string, role string, err error)
 }
 
@@ -63,7 +63,7 @@ type TodoItem interface {
 }
 
 type Services struct {
-	Auth
+	Session
 	User
 	Category
 	TodoList
@@ -82,7 +82,7 @@ type Deps struct {
 
 func NewServices(deps Deps) *Services {
 	return &Services{
-		Auth:     NewAuthService(deps.Repos.Users, deps.Repos.Auth, deps.TokenManager, deps.Hasher, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.Domain),
+		Session:  NewSessionService(deps.Repos.Users, deps.Repos.Session, deps.TokenManager, deps.Hasher, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.Domain),
 		User:     NewUserService(deps.Repos.Users, deps.TokenManager, deps.Hasher),
 		Category: NewCategoryService(deps.Repos.Category, deps.Repos.TodoList),
 		TodoList: NewTodoListService(deps.Repos.TodoList, deps.Repos.TodoItem),

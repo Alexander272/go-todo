@@ -16,7 +16,7 @@ func (h *Handler) initItemRoutes(api *gin.RouterGroup) {
 		todo.POST("/", h.createItem)
 		todo.GET("/all", h.getAllItems)
 		todo.GET("/:id", h.getItemById)
-		todo.PUT("/:id", h.updateItem)
+		todo.PATCH("/:id", h.updateItem)
 		todo.DELETE("/:id", h.removeItem)
 	}
 }
@@ -75,6 +75,10 @@ func (h *Handler) createItem(c *gin.Context) {
 
 	id, err := h.services.TodoItem.Create(c, dto)
 	if err != nil {
+		if errors.Is(err, domain.ErrItemAlreadyExists) {
+			c.JSON(http.StatusBadRequest, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -161,7 +165,7 @@ func (h *Handler) getItemById(c *gin.Context) {
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /todos/{id} [put]
+// @Router /todos/{id} [patch]
 func (h *Handler) updateItem(c *gin.Context) {
 	itemId := c.Param("id")
 	if itemId == "" {

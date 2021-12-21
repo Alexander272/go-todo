@@ -9,11 +9,12 @@ import (
 	"github.com/Alexander272/go-todo/internal/repository"
 	"github.com/Alexander272/go-todo/pkg/auth"
 	"github.com/Alexander272/go-todo/pkg/hash"
+	"github.com/Alexander272/go-todo/pkg/logger"
 )
 
-type AuthService struct {
+type SessionService struct {
 	repoUsers       repository.Users
-	repoAuth        repository.Auth
+	repoSes         repository.Session
 	tokenManager    auth.TokenManager
 	hasher          hash.PasswordHasher
 	accessTokenTTL  time.Duration
@@ -21,11 +22,11 @@ type AuthService struct {
 	domain          string
 }
 
-func NewAuthService(repoUsers repository.Users, repoAuth repository.Auth, tokenManager auth.TokenManager, hasher hash.PasswordHasher,
-	accessTokenTTL time.Duration, refreshTokenTTL time.Duration, domain string) *AuthService {
-	return &AuthService{
+func NewSessionService(repoUsers repository.Users, repoSes repository.Session, tokenManager auth.TokenManager, hasher hash.PasswordHasher,
+	accessTokenTTL time.Duration, refreshTokenTTL time.Duration, domain string) *SessionService {
+	return &SessionService{
 		repoUsers:       repoUsers,
-		repoAuth:        repoAuth,
+		repoSes:         repoSes,
 		tokenManager:    tokenManager,
 		hasher:          hasher,
 		accessTokenTTL:  accessTokenTTL,
@@ -34,12 +35,14 @@ func NewAuthService(repoUsers repository.Users, repoAuth repository.Auth, tokenM
 	}
 }
 
-func (s *AuthService) SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *Token, error) {
+func (s *SessionService) SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *Token, error) {
 	user, err := s.repoUsers.GetByEmail(ctx, input.Email)
 	if err != nil {
+		logger.Debug(err)
 		return nil, nil, errors.New("invalid credentials")
 	}
 	if ok := s.hasher.CheckPasswordHash(input.Password, user.Password); !ok {
+		logger.Debug(ok)
 		return nil, nil, errors.New("invalid credentials")
 	}
 
@@ -52,14 +55,16 @@ func (s *AuthService) SignIn(ctx context.Context, input SignInInput, ua, ip stri
 		return nil, nil, err
 	}
 
-	if err := s.repoAuth.CreateSession(refreshToken, repository.RedisData{
+	data := repository.SessionData{
 		UserId: user.Id,
 		Email:  user.Email,
 		Role:   user.Role,
 		Ua:     ua,
 		Ip:     ip,
 		Exp:    s.refreshTokenTTL,
-	}); err != nil {
+	}
+
+	if err := s.repoSes.CreateSession(ctx, refreshToken, data); err != nil {
 		return nil, nil, err
 	}
 
@@ -78,7 +83,7 @@ func (s *AuthService) SignIn(ctx context.Context, input SignInInput, ua, ip stri
 	}, nil
 }
 
-func (s *AuthService) SingOut(token string) (*http.Cookie, error) {
+func (s *SessionService) SingOut(ctx context.Context, token string) (*http.Cookie, error) {
 	cookie := &http.Cookie{
 		Name:     CookieName,
 		Value:    "",
@@ -89,7 +94,7 @@ func (s *AuthService) SingOut(token string) (*http.Cookie, error) {
 		HttpOnly: true,
 	}
 
-	err := s.repoAuth.RemoveSession(token)
+	err := s.repoSes.RemoveSession(ctx, token)
 	if err != nil {
 		return cookie, err
 	}
@@ -97,8 +102,8 @@ func (s *AuthService) SingOut(token string) (*http.Cookie, error) {
 	return cookie, nil
 }
 
-func (s *AuthService) Refresh(token, ua, ip string) (*Token, *http.Cookie, error) {
-	data, err := s.repoAuth.GetDelSession(token)
+func (s *SessionService) Refresh(ctx context.Context, token, ua, ip string) (*Token, *http.Cookie, error) {
+	data, err := s.repoSes.GetDelSession(ctx, token)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -115,14 +120,16 @@ func (s *AuthService) Refresh(token, ua, ip string) (*Token, *http.Cookie, error
 		return nil, nil, err
 	}
 
-	if err := s.repoAuth.CreateSession(refreshToken, repository.RedisData{
+	newData := repository.SessionData{
 		UserId: data.UserId,
 		Email:  data.Email,
 		Role:   data.Role,
 		Ua:     ua,
 		Ip:     ip,
 		Exp:    s.refreshTokenTTL,
-	}); err != nil {
+	}
+
+	if err := s.repoSes.CreateSession(ctx, refreshToken, newData); err != nil {
 		return nil, nil, err
 	}
 
@@ -141,7 +148,7 @@ func (s *AuthService) Refresh(token, ua, ip string) (*Token, *http.Cookie, error
 	}, cookie, nil
 }
 
-func (s *AuthService) TokenParse(token string) (userId string, role string, err error) {
+func (s *SessionService) TokenParse(token string) (userId string, role string, err error) {
 	claims, err := s.tokenManager.Parse(token)
 	if err != nil {
 		return "", "", err

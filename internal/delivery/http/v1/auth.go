@@ -86,7 +86,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	ua := c.GetHeader("sec-ch-ua") + " " + c.GetHeader("sec-ch-ua-platform") + " " + c.GetHeader("User-Agent")
 	ip := c.ClientIP()
 
-	cookie, token, err := h.services.Auth.SignIn(c, service.SignInInput{
+	cookie, token, err := h.services.Session.SignIn(c, service.SignInInput{
 		Email:    inp.Email,
 		Password: inp.Password,
 	}, ua, ip)
@@ -122,7 +122,7 @@ func (h *Handler) signOut(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	cookie, err := h.services.Auth.SingOut(token)
+	cookie, err := h.services.Session.SingOut(c, token)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -151,8 +151,8 @@ func (h *Handler) refresh(c *gin.Context) {
 		newErrorResponse(c, http.StatusForbidden, err.Error())
 		return
 	}
-	tokens, cookie, err := h.services.Auth.Refresh(token, ua, ip)
 
+	tokens, cookie, err := h.services.Session.Refresh(c, token, ua, ip)
 	if err != nil {
 		newErrorResponse(c, http.StatusForbidden, "Invalid request")
 		return

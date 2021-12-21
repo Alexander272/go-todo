@@ -14,7 +14,7 @@ func (h *Handler) initCategoryRoutes(api *gin.RouterGroup) {
 	{
 		category.GET("/", h.getAllCategories)
 		category.POST("/", h.createCategory)
-		category.PUT("/:id", h.updateCategory)
+		category.PATCH("/:id", h.updateCategory)
 		category.DELETE("/:id", h.removeCategory)
 		category.GET("/lists", h.getCategoriesWithLists)
 	}
@@ -49,6 +49,10 @@ func (h *Handler) createCategory(c *gin.Context) {
 
 	id, err := h.services.Category.Create(c, dto)
 	if err != nil {
+		if errors.Is(err, domain.ErrCategoryAlreadyExists) {
+			c.JSON(http.StatusBadRequest, errorResponse{err.Error()})
+			return
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -134,7 +138,7 @@ func (h *Handler) getCategoriesWithLists(c *gin.Context) {
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /categories/{id} [put]
+// @Router /categories/{id} [patch]
 func (h *Handler) updateCategory(c *gin.Context) {
 	categotyId := c.Param("id")
 	if categotyId == "" {
