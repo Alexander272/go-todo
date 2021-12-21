@@ -2,8 +2,8 @@ import api from "./api"
 import { Category, CategoryWithLists, NewCategory } from "../types/category"
 import { IdResponse } from "../types/response"
 
-class CategoryService {
-    async get(): Promise<{ data: CategoryWithLists }> {
+export default class CategoryService {
+    static async get(): Promise<{ data: CategoryWithLists }> {
         try {
             const res = await api.get("/categories/lists/")
             return res.data
@@ -12,7 +12,7 @@ class CategoryService {
         }
     }
 
-    async create(category: NewCategory): Promise<{ data: IdResponse }> {
+    static async create(category: NewCategory): Promise<{ data: IdResponse }> {
         try {
             const res = await api.post("/categories/", category)
             return res.data
@@ -21,7 +21,7 @@ class CategoryService {
         }
     }
 
-    async update(category: Category): Promise<{ data: IdResponse }> {
+    static async update(category: Category): Promise<{ data: IdResponse }> {
         try {
             const res = await api.patch(`/category/${category.id}/`, category)
             return res.data
@@ -30,7 +30,7 @@ class CategoryService {
         }
     }
 
-    async remove(id: string) {
+    static async remove(id: string) {
         try {
             const res = await api.delete(`/category/${id}`)
             return res.data
@@ -39,5 +39,3 @@ class CategoryService {
         }
     }
 }
-
-export default new CategoryService()

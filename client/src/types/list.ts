@@ -11,3 +11,10 @@ export type NewList = {
     title: string
     description: string
 }
+
+export type UpdateList = {
+    id: string
+    categoryId?: string
+    title?: string
+    description?: string
+}

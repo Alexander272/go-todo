@@ -17,3 +17,12 @@ export type NewTodo = {
     startAt: number
     priority: number
 }
+
+export type UpdateTodo = {
+    id: string
+    listId?: string
+    title?: string
+    description?: string
+    startAt?: number
+    priority?: number
+}
