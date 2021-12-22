@@ -13,6 +13,18 @@ type User struct {
 	// todo можно потом добавить настройки для пользователя
 }
 
+type Token struct {
+	Token  TokenData `json:"token"`
+	Role   string    `json:"role"`
+	Name   string    `json:"name"`
+	UserId string    `json:"userId"`
+}
+
+type TokenData struct {
+	AccessToken string `json:"accessToken"`
+	Exp         int64  `json:"exp"`
+}
+
 type Verification struct {
 	Code     string `json:"code" bson:"code"`
 	Verified bool   `json:"verified" bson:"verified"`

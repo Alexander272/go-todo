@@ -72,7 +72,7 @@ type Token struct {
 // @Accept  json
 // @Produce  json
 // @Param input body SignInInput true "sign in info"
-// @Success 200 {object} Token
+// @Success 200 {object} dataResponse{data=domain.Token}
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
@@ -100,9 +100,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	}
 
 	c.SetCookie(cookie.Name, cookie.Value, cookie.MaxAge, cookie.Path, cookie.Domain, cookie.Secure, cookie.HttpOnly)
-	c.JSON(http.StatusOK, Token{
-		AccessToken: token.AccessToken,
-	})
+	c.JSON(http.StatusOK, dataResponse{Data: token})
 }
 
 // @Summary SignOut
@@ -137,7 +135,7 @@ func (h *Handler) signOut(c *gin.Context) {
 // @Id refresh
 // @Accept json
 // @Produce json
-// @Success 200 {object} Token
+// @Success 200 {object} dataResponse{data=domain.Token}
 // @Failure 400,403,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
@@ -152,14 +150,12 @@ func (h *Handler) refresh(c *gin.Context) {
 		return
 	}
 
-	tokens, cookie, err := h.services.Session.Refresh(c, token, ua, ip)
+	newToken, cookie, err := h.services.Session.Refresh(c, token, ua, ip)
 	if err != nil {
 		newErrorResponse(c, http.StatusForbidden, "Invalid request")
 		return
 	}
 
 	c.SetCookie(cookie.Name, cookie.Value, cookie.MaxAge, cookie.Path, cookie.Domain, cookie.Secure, cookie.HttpOnly)
-	c.JSON(http.StatusOK, Token{
-		AccessToken: tokens.AccessToken,
-	})
+	c.JSON(http.StatusOK, dataResponse{Data: newToken})
 }

@@ -1,7 +1,7 @@
 import api from "./api"
 import { Category, CategoryWithLists, NewCategory } from "../types/category"
 import { IdResponse } from "../types/response"
-import axios, { AxiosError } from "axios"
+import axios from "axios"
 
 export default class CategoryService {
     static async get(): Promise<{ data: CategoryWithLists }> {

@@ -11,7 +11,7 @@ import (
 )
 
 type TokenManager interface {
-	NewJWT(userId, email, role string, ttl time.Duration) (string, error)
+	NewJWT(userId, email, role string, ttl time.Duration) (time.Time, string, error)
 	Parse(accessToken string) (jwt.MapClaims, error)
 	NewRefreshToken() (string, error)
 }
@@ -27,15 +27,20 @@ func NewManager(jwtKey string) (*Manager, error) {
 	return &Manager{jwtKey: jwtKey}, nil
 }
 
-func (m *Manager) NewJWT(userId, email, role string, ttl time.Duration) (string, error) {
+func (m *Manager) NewJWT(userId, email, role string, ttl time.Duration) (iat time.Time, accessToken string, err error) {
+	iat = time.Now()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp":    time.Now().Add(ttl).Unix(),
-		"iat":    time.Now().Unix(),
+		"exp":    iat.Add(ttl).Unix(),
+		"iat":    iat.Unix(),
 		"userId": userId,
 		"email":  email,
 		"role":   role,
 	})
-	return token.SignedString([]byte(m.jwtKey))
+	accessToken, err = token.SignedString([]byte(m.jwtKey))
+	if err != nil {
+		return iat, accessToken, err
+	}
+	return iat, accessToken, nil
 }
 
 func (m *Manager) Parse(accessToken string) (jwt.MapClaims, error) {

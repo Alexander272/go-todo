@@ -20,12 +20,13 @@ func NewSessionRepo(client redis.Cmdable) *SessionRepo {
 }
 
 type SessionData struct {
-	UserId string
-	Email  string
-	Role   string
-	Ua     string
-	Ip     string
-	Exp    time.Duration
+	UserId   string
+	UserName string
+	Email    string
+	Role     string
+	Ua       string
+	Ip       string
+	Exp      time.Duration
 }
 
 func (i SessionData) MarshalBinary() ([]byte, error) {

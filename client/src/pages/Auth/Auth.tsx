@@ -15,10 +15,10 @@ export default function AuthPage() {
             <div className={`${classes.container} ${isSignIn ? classes.signIn : classes.signUp}`}>
                 <div className={classes.form}>
                     <ul className={classes.nav}>
-                        <li className={`${classes.link} ${isSignIn ?? classes.active}`}>
+                        <li className={`${classes.link} ${isSignIn && classes.active}`}>
                             <span onClick={changeTabHandler(true)}>Sign In</span>
                         </li>
-                        <li className={`${classes.link} ${!isSignIn ?? classes.active}`}>
+                        <li className={`${classes.link} ${!isSignIn && classes.active}`}>
                             <span onClick={changeTabHandler(false)}>Sign Up</span>
                         </li>
                     </ul>

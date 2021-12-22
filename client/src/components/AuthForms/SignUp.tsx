@@ -3,7 +3,7 @@ import { Button } from "../../components/UI/Button/Button"
 import { Input } from "../../components/UI/Input/Input"
 import classes from "./form.module.scss"
 
-interface IFormSignUp {
+export interface IFormSignUp {
     nicname: string
     email: string
     password: string

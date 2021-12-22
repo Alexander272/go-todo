@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/Alexander272/go-todo/internal/repository"
 	"github.com/Alexander272/go-todo/pkg/auth"
 	"github.com/Alexander272/go-todo/pkg/hash"
@@ -35,7 +36,7 @@ func NewSessionService(repoUsers repository.Users, repoSes repository.Session, t
 	}
 }
 
-func (s *SessionService) SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *Token, error) {
+func (s *SessionService) SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *domain.Token, error) {
 	user, err := s.repoUsers.GetByEmail(ctx, input.Email)
 	if err != nil {
 		logger.Debug(err)
@@ -46,7 +47,7 @@ func (s *SessionService) SignIn(ctx context.Context, input SignInInput, ua, ip s
 		return nil, nil, errors.New("invalid credentials")
 	}
 
-	accessToken, err := s.tokenManager.NewJWT(user.Id, user.Email, user.Role, s.accessTokenTTL)
+	iat, accessToken, err := s.tokenManager.NewJWT(user.Id, user.Email, user.Role, s.accessTokenTTL)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -56,12 +57,13 @@ func (s *SessionService) SignIn(ctx context.Context, input SignInInput, ua, ip s
 	}
 
 	data := repository.SessionData{
-		UserId: user.Id,
-		Email:  user.Email,
-		Role:   user.Role,
-		Ua:     ua,
-		Ip:     ip,
-		Exp:    s.refreshTokenTTL,
+		UserId:   user.Id,
+		UserName: user.Name,
+		Email:    user.Email,
+		Role:     user.Role,
+		Ua:       ua,
+		Ip:       ip,
+		Exp:      s.refreshTokenTTL,
 	}
 
 	if err := s.repoSes.CreateSession(ctx, refreshToken, data); err != nil {
@@ -78,9 +80,17 @@ func (s *SessionService) SignIn(ctx context.Context, input SignInInput, ua, ip s
 		HttpOnly: true,
 	}
 
-	return cookie, &Token{
-		AccessToken: accessToken,
-	}, nil
+	token := &domain.Token{
+		Token: domain.TokenData{
+			AccessToken: accessToken,
+			Exp:         iat.Add(s.accessTokenTTL).Unix(),
+		},
+		UserId: user.Id,
+		Role:   user.Role,
+		Name:   user.Name,
+	}
+
+	return cookie, token, nil
 }
 
 func (s *SessionService) SingOut(ctx context.Context, token string) (*http.Cookie, error) {
@@ -102,7 +112,7 @@ func (s *SessionService) SingOut(ctx context.Context, token string) (*http.Cooki
 	return cookie, nil
 }
 
-func (s *SessionService) Refresh(ctx context.Context, token, ua, ip string) (*Token, *http.Cookie, error) {
+func (s *SessionService) Refresh(ctx context.Context, token, ua, ip string) (*domain.Token, *http.Cookie, error) {
 	data, err := s.repoSes.GetDelSession(ctx, token)
 	if err != nil {
 		return nil, nil, err
@@ -111,7 +121,7 @@ func (s *SessionService) Refresh(ctx context.Context, token, ua, ip string) (*To
 		return nil, nil, errors.New("invalid data")
 	}
 
-	accessToken, err := s.tokenManager.NewJWT(data.UserId, data.Email, data.Role, s.accessTokenTTL)
+	iat, accessToken, err := s.tokenManager.NewJWT(data.UserId, data.Email, data.Role, s.accessTokenTTL)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -121,12 +131,13 @@ func (s *SessionService) Refresh(ctx context.Context, token, ua, ip string) (*To
 	}
 
 	newData := repository.SessionData{
-		UserId: data.UserId,
-		Email:  data.Email,
-		Role:   data.Role,
-		Ua:     ua,
-		Ip:     ip,
-		Exp:    s.refreshTokenTTL,
+		UserId:   data.UserId,
+		UserName: data.UserName,
+		Email:    data.Email,
+		Role:     data.Role,
+		Ua:       ua,
+		Ip:       ip,
+		Exp:      s.refreshTokenTTL,
 	}
 
 	if err := s.repoSes.CreateSession(ctx, refreshToken, newData); err != nil {
@@ -143,9 +154,17 @@ func (s *SessionService) Refresh(ctx context.Context, token, ua, ip string) (*To
 		HttpOnly: true,
 	}
 
-	return &Token{
-		AccessToken: accessToken,
-	}, cookie, nil
+	newToken := &domain.Token{
+		Token: domain.TokenData{
+			AccessToken: accessToken,
+			Exp:         iat.Add(s.accessTokenTTL).Unix(),
+		},
+		UserId: data.UserId,
+		Role:   data.Role,
+		Name:   data.UserName,
+	}
+
+	return newToken, cookie, nil
 }
 
 func (s *SessionService) TokenParse(token string) (userId string, role string, err error) {

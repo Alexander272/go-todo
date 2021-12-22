@@ -17,15 +17,16 @@ type SignInInput struct {
 	Email    string
 	Password string
 }
-type Token struct {
-	AccessToken  string
-	RefreshToken string
-}
+
+// type Token struct {
+// 	AccessToken  string
+// 	RefreshToken string
+// }
 
 type Session interface {
-	SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *Token, error)
+	SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *domain.Token, error)
 	SingOut(ctx context.Context, token string) (*http.Cookie, error)
-	Refresh(ctx context.Context, token, ua, ip string) (*Token, *http.Cookie, error)
+	Refresh(ctx context.Context, token, ua, ip string) (*domain.Token, *http.Cookie, error)
 	TokenParse(token string) (userId string, role string, err error)
 }
 
