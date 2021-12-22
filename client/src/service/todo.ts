@@ -7,7 +7,7 @@ export default class TodoService {
         try {
             const res = await api.get(`/${listId}/todos`)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.response.data
         }
     }
@@ -16,7 +16,7 @@ export default class TodoService {
         try {
             const res = await api.post("/todos/", todo)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.respoonse.data
         }
     }
@@ -25,7 +25,7 @@ export default class TodoService {
         try {
             const res = await api.patch(`/todos/${todo.id}`, todo)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.response.data
         }
     }
@@ -34,7 +34,7 @@ export default class TodoService {
         try {
             const res = await api.delete(`/todos/${id}`)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.response.data
         }
     }

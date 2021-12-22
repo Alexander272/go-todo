@@ -1,0 +1,38 @@
+.field {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10px 0;
+
+    &.vertical {
+        flex-direction: column;
+    }
+
+    &.horizontal {
+        flex-direction: row;
+    }
+}
+
+.label {
+    font-size: 0.75rem;
+    margin-bottom: 10px;
+}
+
+.input {
+    padding: 0.5rem 1rem;
+    border: 2px solid rgba(17, 97, 237, 1);
+    letter-spacing: 1px;
+    transition: 0.3s all ease-in-out;
+    outline: none;
+
+    &.round {
+        border-radius: 3em;
+    }
+
+    &.rounded {
+        border-radius: 12px;
+    }
+}
+
+.error {
+    flex-basis: 100%;
+}

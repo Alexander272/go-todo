@@ -7,7 +7,7 @@ export default class ListService {
         try {
             const res = await api.get(`/lists/${id}`)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.response.data
         }
     }
@@ -16,7 +16,7 @@ export default class ListService {
         try {
             const res = await api.post("/lists/", list)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.response.data
         }
     }
@@ -25,7 +25,7 @@ export default class ListService {
         try {
             const res = await api.patch(`/lists/${list.id}`, list)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.response.data
         }
     }
@@ -34,7 +34,7 @@ export default class ListService {
         try {
             const res = await api.delete(`/lists/${id}`)
             return res.data
-        } catch (error) {
+        } catch (error: any) {
             throw error.response.data
         }
     }
