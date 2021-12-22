@@ -1,0 +1,102 @@
+.profile {
+    flex-basis: 15%;
+    max-width: 340px;
+    flex-grow: 1;
+    border-right: 1px solid var(--border-color);
+}
+
+.appName {
+    text-align: center;
+    padding: 25px 0;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    color: var(--title-color);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 3px;
+    background-color: var(--theme-bg-color);
+}
+
+.wrapper {
+    padding: 25px 40px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profileBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.image {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.username {
+    margin: 13px 0 8px;
+    font-weight: 600;
+    line-height: 15px;
+}
+
+.progress {
+    margin-top: 10px;
+    margin-bottom: 15px;
+
+    &__count {
+        text-align: right;
+        color: var(--main-color);
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    &__bar {
+        margin-top: 5px;
+        border-radius: 4px;
+        width: 100%;
+        background-color: var(--button-bg-color);
+        height: 8px;
+        overflow: hidden;
+    }
+
+    &__line {
+        height: 100%;
+        border-radius: 4px;
+        background-color: var(--button-color);
+    }
+}
+
+.status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__item {
+        flex-grow: 1;
+        padding: 5px;
+        text-align: center;
+    }
+
+    &__count {
+        font-weight: 600;
+        font-size: 16px;
+        margin-bottom: 7px;
+    }
+
+    &__text {
+        font-size: 12px;
+        color: var(--main-color);
+        font-weight: 700;
+    }
+
+    &__tasks {
+        margin-top: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--main-light-color);
+    }
+}
