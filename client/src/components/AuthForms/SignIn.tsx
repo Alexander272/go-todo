@@ -1,18 +1,22 @@
 import { useForm, SubmitHandler } from "react-hook-form"
+import { useDispatch } from "react-redux"
+import { Dispatch } from "../../store/store"
+import { ISignIn } from "../../types/user"
 import { Button } from "../UI/Button/Button"
 import { Input } from "../UI/Input/Input"
 import classes from "./form.module.scss"
 
-export interface IFormSignIn {
-    email: string
-    password: string
-}
-
 export const SignInForm = () => {
-    const { register, handleSubmit } = useForm<IFormSignIn>()
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<ISignIn>()
 
-    const signInHandler: SubmitHandler<IFormSignIn> = data => {
-        console.log("signInHandler", data)
+    const { user } = useDispatch<Dispatch>()
+
+    const signInHandler: SubmitHandler<ISignIn> = data => {
+        user.signIn(data)
     }
 
     return (
@@ -25,6 +29,13 @@ export const SignInForm = () => {
                 inputType='round'
                 type='email'
                 register={register}
+                error={errors.email}
+                errorText='Email is incorrect'
+                rule={{
+                    required: true,
+                    pattern:
+                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                }}
             />
             <Input
                 key='in-password'
@@ -34,6 +45,9 @@ export const SignInForm = () => {
                 inputType='round'
                 type='password'
                 register={register}
+                error={errors.password}
+                errorText='The minimum password length is 6 characters, the maximum is 64'
+                rule={{ required: true, minLength: 6, maxLength: 64 }}
             />
             <Button rounded='round' type='submit'>
                 Sign in

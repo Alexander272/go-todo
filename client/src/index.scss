@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap");
 
 /* Указываем box sizing */
 *,
@@ -78,10 +78,11 @@ select {
     --main-color: #7a7e9d;
     --main-light-color: #a1a4b9;
     --title-color: #979dc3;
-    --body-font: 'Jost', sans-serif;
+    --body-font: "Jost", sans-serif;
     --button-bg-color: #eaeefc;
     --button-color: #4d76fd;
     --unselected-mail: #f1f2f7;
     --calendar-border-color: #cbcfe0;
     --main-container-bg: #f0f0f7;
+    --danger-color: rgb(207, 25, 25);
 }

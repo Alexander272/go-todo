@@ -1,7 +1,7 @@
 .field {
     display: flex;
-    flex-wrap: wrap;
     margin: 10px 0;
+    position: relative;
 
     &.vertical {
         flex-direction: column;
@@ -19,10 +19,14 @@
 
 .input {
     padding: 0.5rem 1rem;
-    border: 2px solid rgba(17, 97, 237, 1);
+    border: 2px solid rgba(255, 255, 255, 0.5);
     letter-spacing: 1px;
     transition: 0.3s all ease-in-out;
     outline: none;
+
+    &:active {
+        border-color: rgba(17, 97, 237, 1);
+    }
 
     &.round {
         border-radius: 3em;
@@ -31,8 +35,18 @@
     &.rounded {
         border-radius: 12px;
     }
+
+    &.invalid {
+        border-color: var(--danger-color);
+    }
 }
 
 .error {
-    flex-basis: 100%;
+    position: absolute;
+    bottom: -23px;
+    color: var(--danger-color);
+    font-size: 0.85rem;
+    display: flex;
+    width: 100%;
+    justify-content: center;
 }

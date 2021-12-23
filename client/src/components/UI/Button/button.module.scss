@@ -1,6 +1,6 @@
 .button {
     color: #ffffff;
-    font-family: "Montserrat", sans-serif;
+    font-family: var(--body-font);
     letter-spacing: 1px;
     display: block;
     width: 100%;
@@ -36,7 +36,7 @@
 }
 .ghost {
     border: 1px solid rgba(17, 97, 237, 1);
-    background-color: #fff;
+    background-color: var(--button-bg-color);
     color: rgba(17, 97, 237, 1);
     &:hover {
         background-color: rgba(17, 97, 237, 1);

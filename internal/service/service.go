@@ -14,8 +14,8 @@ import (
 const CookieName = "session"
 
 type SignInInput struct {
-	Email    string
-	Password string
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6,max=64"`
 }
 
 // type Token struct {

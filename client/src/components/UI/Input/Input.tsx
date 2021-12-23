@@ -9,6 +9,7 @@ type Props = {
     inputType?: "round" | "rounded"
     onChange?: any
     register?: UseFormRegister<any>
+    rule?: Partial<any>
     error?: any
     errorText?: string
 }
@@ -20,11 +21,14 @@ export const Input = ({
     orentation,
     inputType,
     register,
+    rule,
     onChange,
     error,
     errorText,
     ...attr
 }: Props & React.InputHTMLAttributes<HTMLInputElement>) => {
+    // const partial = rule ? rule : []
+
     return (
         <div className={`${classes.field} ${classes[orentation || "vertical"]}`}>
             {label && (
@@ -34,14 +38,18 @@ export const Input = ({
             )}
             {register ? (
                 <input
-                    className={`${classes.input} ${classes[inputType || "rounded"]}`}
+                    className={`${classes.input} ${error && classes.invalid} ${
+                        classes[inputType || "rounded"]
+                    }`}
                     id={id}
                     {...attr}
-                    {...register(name)}
+                    {...register(name, rule)}
                 />
             ) : (
                 <input
-                    className={`${classes.input} ${classes[inputType || "rounded"]}`}
+                    className={`${classes.input} ${error && classes.invalid} ${
+                        classes[inputType || "rounded"]
+                    }`}
                     id={id}
                     name={name}
                     onChange={onChange}

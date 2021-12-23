@@ -91,7 +91,7 @@ func (h *Handler) signIn(c *gin.Context) {
 		Password: inp.Password,
 	}, ua, ip)
 	if err != nil {
-		if errors.Is(err, domain.ErrUserNotFound) {
+		if errors.Is(err, domain.ErrUserNotFound) || err.Error() == "invalid credentials" {
 			newErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}

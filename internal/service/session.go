@@ -10,7 +10,6 @@ import (
 	"github.com/Alexander272/go-todo/internal/repository"
 	"github.com/Alexander272/go-todo/pkg/auth"
 	"github.com/Alexander272/go-todo/pkg/hash"
-	"github.com/Alexander272/go-todo/pkg/logger"
 )
 
 type SessionService struct {
@@ -39,11 +38,9 @@ func NewSessionService(repoUsers repository.Users, repoSes repository.Session, t
 func (s *SessionService) SignIn(ctx context.Context, input SignInInput, ua, ip string) (*http.Cookie, *domain.Token, error) {
 	user, err := s.repoUsers.GetByEmail(ctx, input.Email)
 	if err != nil {
-		logger.Debug(err)
 		return nil, nil, errors.New("invalid credentials")
 	}
 	if ok := s.hasher.CheckPasswordHash(input.Password, user.Password); !ok {
-		logger.Debug(ok)
 		return nil, nil, errors.New("invalid credentials")
 	}
 

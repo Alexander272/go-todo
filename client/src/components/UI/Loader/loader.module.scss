@@ -1,0 +1,73 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #36363647;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 20;
+}
+
+.loader {
+    --offsetSize: 20px;
+    --size: 40px;
+    --animateSize: 60px;
+
+    position: relative;
+    z-index: 25;
+    color: var(--button-color);
+    width: var(--size);
+    height: var(--size);
+
+    &.small {
+        --offsetSize: 10px;
+        --size: 20px;
+        --animateSize: 30px;
+    }
+
+    &.large {
+        --offsetSize: 30px;
+        --size: 60px;
+        --animateSize: 90px;
+    }
+
+    background: conic-gradient(
+            from -45deg at top var(--offsetSize) left 50%,
+            #0000,
+            currentColor 1deg 90deg,
+            #0000 91deg
+        ),
+        conic-gradient(
+            from 45deg at right var(--offsetSize) top 50%,
+            #0000,
+            currentColor 1deg 90deg,
+            #0000 91deg
+        ),
+        conic-gradient(
+            from 135deg at bottom var(--offsetSize) left 50%,
+            #0000,
+            currentColor 1deg 90deg,
+            #0000 91deg
+        ),
+        conic-gradient(
+            from -135deg at left var(--offsetSize) top 50%,
+            #0000,
+            currentColor 1deg 90deg,
+            #0000 91deg
+        );
+    animation: animate 2s infinite cubic-bezier(0.3, 1, 0, 1);
+}
+
+@keyframes animate {
+    50% {
+        width: var(--animateSize);
+        height: var(--animateSize);
+        transform: rotate(180deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
