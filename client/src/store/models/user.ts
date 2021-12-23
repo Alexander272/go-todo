@@ -7,8 +7,6 @@ import { ISignIn, ISignUp } from "../../types/user"
 
 interface IUserState {
     loading: boolean
-    message: string | null
-    error: null | string
     token: {
         accessToken: string
         expiresAt: number
@@ -22,8 +20,6 @@ interface IUserState {
 export const user = createModel<RootModel>()({
     state: {
         loading: false,
-        message: null,
-        error: null,
         token: {
             accessToken: "",
             expiresAt: 0,
@@ -37,14 +33,6 @@ export const user = createModel<RootModel>()({
     reducers: {
         setLoading(state, payload: boolean) {
             state.loading = payload
-            return state
-        },
-        setError(state, payload: string | null) {
-            state.error = payload
-            return state
-        },
-        setMessage(state, payload: string | null) {
-            state.message = payload
             return state
         },
         setUser(state, payload: Token) {
@@ -76,9 +64,6 @@ export const user = createModel<RootModel>()({
                     const res = await AuthService.signIn(payload)
                     user.setUser(res.data)
                 } catch (error: any) {
-                    console.log(error)
-
-                    user.setError(error.message)
                     toast.error(error.message)
                 } finally {
                     user.setLoading(false)
@@ -86,15 +71,12 @@ export const user = createModel<RootModel>()({
             },
 
             async singUp(payload: ISignUp) {
-                user.setMessage(null)
                 user.setLoading(true)
                 try {
-                    const res = await AuthService.signUp(payload)
-                    user.setMessage(res.data)
+                    await AuthService.signUp(payload)
                     toast.success("Registration completed successfully")
                 } catch (error: any) {
                     toast.error(error.message)
-                    user.setError(error.message)
                 } finally {
                     user.setLoading(false)
                 }
@@ -107,7 +89,6 @@ export const user = createModel<RootModel>()({
                     user.clearUser()
                 } catch (error: any) {
                     toast.error(error.message)
-                    user.setError(error.message)
                 } finally {
                     user.setLoading(false)
                 }
@@ -119,7 +100,7 @@ export const user = createModel<RootModel>()({
                     const res = await AuthService.refresh()
                     user.setUser(res.data)
                 } catch (error: any) {
-                    user.setError(error.message)
+                    console.log(error.message)
                 } finally {
                     user.setLoading(false)
                 }

@@ -4,7 +4,7 @@ import { IdResponse } from "../types/response"
 import axios from "axios"
 
 export default class CategoryService {
-    static async get(): Promise<{ data: CategoryWithLists }> {
+    static async get(): Promise<{ data: CategoryWithLists[] }> {
         try {
             const res = await api.get("/categories/lists/")
             return res.data

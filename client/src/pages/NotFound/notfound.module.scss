@@ -1,0 +1,41 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #79afff;
+}
+
+.title {
+    font-size: 15em;
+    color: var(--button-color);
+    text-shadow: -20px 15px 20px #fff, -30px 20px 0 #d5caff;
+    font-family: sans-serif;
+    letter-spacing: 25px;
+}
+
+.text {
+    color: #fff;
+    max-width: 450px;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.buttons {
+    margin-top: 30px;
+    display: flex;
+}
+
+.linkButton {
+    display: flex;
+    padding: 7px 30px;
+    box-shadow: 0px 0px 6px 3px #fff;
+    background-color: var(--button-color);
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 16px;
+    cursor: pointer;
+    margin: 0 15px;
+}
