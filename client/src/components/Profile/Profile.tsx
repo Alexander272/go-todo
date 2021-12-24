@@ -77,10 +77,10 @@ export const Profile: FC = () => {
                     </Modal.Content>
                     <Modal.Footer>
                         <div className={classes.btns}>
-                            <Button onClick={toggle} variant='grayPrimary'>
+                            <Button size='small' onClick={toggle} variant='grayPrimary'>
                                 Cancel
                             </Button>
-                            <Button>Create</Button>
+                            <Button size='small'>Create</Button>
                         </div>
                     </Modal.Footer>
                 </Modal>

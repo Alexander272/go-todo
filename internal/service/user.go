@@ -45,6 +45,7 @@ func (s *UserService) SignUp(ctx context.Context, dto domain.CreateUserDTO) (id 
 	}
 
 	user := domain.NewUser(dto)
+	user.Role = "user"
 	user.Password = passwordHash
 	user.RegisteredAt = time.Now().Unix()
 	user.LastVisitAt = time.Now().Unix()

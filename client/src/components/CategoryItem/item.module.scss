@@ -16,7 +16,6 @@
         color: var(--button-color);
 
         .icon {
-            display: inline-block;
             transform: rotate(180deg);
             margin-right: 15px;
             margin-left: 5px;
@@ -39,6 +38,7 @@
 }
 
 .icon {
-    transition: margin 0.3s ease-in-out;
+    display: inline-block;
+    transition: margin 0.3s ease-in-out, transform 0.3s ease-in-out;
     margin-right: 20px;
 }

@@ -10,13 +10,53 @@ interface ICategoryState {
     loading: boolean
     listLoad: boolean
     categories: CategoryWithLists[]
+    selectedCategories: string[]
 }
 
 export const category = createModel<RootModel>()({
     state: {
         loading: false,
         listLoad: false,
-        categories: [],
+        categories: [
+            {
+                id: "123",
+                title: "first category",
+                lists: [
+                    {
+                        id: "i1",
+                        title: "first list",
+                        description: "mock list",
+                        createdAt: 1640342763,
+                    },
+                    {
+                        id: "i2",
+                        title: "seconde list",
+                        description: "mock list",
+                        createdAt: 1640342763,
+                    },
+                    {
+                        id: "i3",
+                        title: "third list",
+                        description: "mock list",
+                        createdAt: 1640342763,
+                    },
+                ],
+            },
+            {
+                id: "234",
+                title: "second category",
+                lists: [
+                    {
+                        id: "i1",
+                        title: "first list",
+                        description: "mock list",
+                        createdAt: 1640342763,
+                    },
+                ],
+            },
+            { id: "345", title: "third category", lists: [] },
+        ],
+        selectedCategories: ["123"],
     } as ICategoryState,
 
     reducers: {
@@ -26,6 +66,14 @@ export const category = createModel<RootModel>()({
         },
         setListLoading(state, payload: boolean) {
             state.listLoad = payload
+            return state
+        },
+        selectCategory(state, payload: string) {
+            state.selectedCategories.push(payload)
+            return state
+        },
+        unselectCategory(state, payload: string) {
+            state.selectedCategories = state.selectedCategories.filter(catId => catId !== payload)
             return state
         },
         setCategory(state, payload: CategoryWithLists[]) {

@@ -1,0 +1,41 @@
+.scroll {
+    margin-left: 2px;
+    &.active {
+    }
+}
+
+.header {
+    border-left: 4px solid var(--button-color);
+    cursor: pointer;
+
+    &:hover {
+    }
+}
+
+.item {
+    padding: 15px 35px;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+
+    &:first-child {
+        border-top: none;
+    }
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    font-weight: 700;
+}
+.icon {
+    display: block;
+}
+
+.content {
+    max-height: 0;
+}

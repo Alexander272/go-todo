@@ -1,0 +1,18 @@
+.page {
+    flex-basis: 100%;
+    display: flex;
+    flex-grow: 1;
+}
+
+.container {
+    flex-basis: 40%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+}
+
+.empty {
+    margin: 20px;
+    font-size: 0.9rem;
+    color: var(--main-light-color);
+}

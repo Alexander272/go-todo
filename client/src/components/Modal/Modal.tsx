@@ -4,7 +4,6 @@ import { Backdrop } from "../Backdrop/Backdrop"
 import { Content } from "./Content"
 import { Footer } from "./Footer"
 import { Header } from "./Header"
-import { useModal } from "./hooks/useModal"
 import classes from "./modal.module.scss"
 
 type Props = {
