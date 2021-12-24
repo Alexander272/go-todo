@@ -1,0 +1,35 @@
+.modal {
+    z-index: 55;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--theme-bg-color);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    min-width: 450px;
+    overflow: hidden;
+}
+
+.header {
+    order: -1;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+
+    &__container {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+.content {
+    padding: 10px 20px;
+}
+
+.footer {
+    order: 1;
+    display: flex;
+    padding: 10px 20px;
+    border-top: 1px solid var(--border-color);
+}

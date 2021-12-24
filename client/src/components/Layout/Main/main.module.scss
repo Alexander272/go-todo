@@ -2,5 +2,9 @@
     min-height: 100vh;
     min-width: 320px;
     display: flex;
-    flex-direction: column;
+    // flex-direction: column;
+}
+
+.container {
+    flex-grow: 1;
 }

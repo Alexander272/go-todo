@@ -66,7 +66,10 @@
     &__line {
         height: 100%;
         border-radius: 4px;
-        background-color: var(--button-color);
+        // background-color: var(--button-color);
+        background: linear-gradient(90deg, #4eaaf5, #2235e0);
+        transition: width 0.5s ease-in-out;
+        width: 0%;
     }
 }
 
@@ -98,5 +101,29 @@
         font-size: 10px;
         font-weight: 600;
         color: var(--main-light-color);
+    }
+}
+
+.projects {
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    &__title {
+        padding-left: 5px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+}
+
+.btns {
+    display: flex;
+    flex-grow: 1;
+
+    button:nth-child(n) {
+        margin: 0 5px;
     }
 }

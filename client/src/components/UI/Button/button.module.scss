@@ -1,7 +1,6 @@
 .button {
     color: #ffffff;
     font-family: var(--body-font);
-    letter-spacing: 1px;
     display: block;
     width: 100%;
     cursor: pointer;
@@ -13,6 +12,64 @@
     }
     &:disabled {
         cursor: not-allowed;
+    }
+}
+
+.circle {
+    border-radius: 50%;
+    position: relative;
+
+    &:only-child {
+        position: absolute;
+        transform: translate(-50%, -50%);
+    }
+
+    &.small {
+        width: 26px;
+        height: 26px;
+        font-size: 0.9rem;
+    }
+    &.middle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    &.large {
+        width: 70px;
+        height: 70px;
+        font-size: 1.15rem;
+    }
+}
+
+.default {
+    letter-spacing: 1px;
+
+    &.small {
+        font-size: 0.85rem;
+    }
+    &.middle {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+    &.large {
+        font-size: 1.15rem;
+        padding: 1rem;
+    }
+
+    &.none {
+        border-radius: 0;
+    }
+    &.low {
+        border-radius: 8px;
+    }
+    &.medium {
+        border-radius: 12px;
+    }
+    &.high {
+        border-radius: 16px;
+    }
+    &.round {
+        border-radius: 3em;
     }
 }
 
@@ -47,50 +104,24 @@
     }
 }
 .grayPrimary {
-    background-color: rgb(118, 124, 134);
+    background-color: var(--button-bg-color);
+    color: var(--button-color);
     &:hover {
         background-color: rgba(17, 97, 237, 1);
+        color: #fff;
     }
     &:disabled {
-        background-color: rgb(100, 91, 91);
+        background-color: rgb(150, 150, 150);
     }
 }
 .grayDanger {
-    background-color: rgb(118, 124, 134);
+    background-color: var(--button-bg-color);
+    color: rgb(237, 17, 17);
     &:hover {
         background-color: rgb(237, 17, 17);
+        color: #fff;
     }
     &:disabled {
-        background-color: rgb(100, 91, 91);
+        background-color: rgb(150, 150, 150);
     }
-}
-
-.small {
-    font-size: 0.85rem;
-}
-.middle {
-    font-size: 1rem;
-    padding: 0.75rem;
-}
-.large {
-    font-size: 1.15rem;
-}
-
-.none {
-    border-radius: 0;
-}
-.low {
-    border-radius: 8px;
-}
-.medium {
-    border-radius: 12px;
-}
-.high {
-    border-radius: 16px;
-}
-.round {
-    border-radius: 3em;
-}
-.circle {
-    border-radius: 50%;
 }

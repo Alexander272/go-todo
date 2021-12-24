@@ -8,8 +8,6 @@ export default class AuthService {
             const res = await api.post("/auth/sign-in/", data)
             return res.data
         } catch (error: any) {
-            console.log(error)
-            console.log(error.response)
             throw error.response.data
         }
     }

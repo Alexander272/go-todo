@@ -14,7 +14,6 @@ export const MyRoutes = () => {
                     {/* <Route index /> */}
                 </Route>
                 <Route path='/auth/' element={<AuthPage />} />
-
                 <Route path='*' element={<NotFoundPage />} />
             </Routes>
         </Suspense>

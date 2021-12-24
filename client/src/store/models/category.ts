@@ -9,14 +9,14 @@ import { List, NewList, UpdateList } from "../../types/list"
 interface ICategoryState {
     loading: boolean
     listLoad: boolean
-    category: CategoryWithLists[]
+    categories: CategoryWithLists[]
 }
 
 export const category = createModel<RootModel>()({
     state: {
         loading: false,
         listLoad: false,
-        category: [],
+        categories: [],
     } as ICategoryState,
 
     reducers: {
@@ -29,36 +29,36 @@ export const category = createModel<RootModel>()({
             return state
         },
         setCategory(state, payload: CategoryWithLists[]) {
-            state.category = payload
+            state.categories = payload
             return state
         },
         addCategory(state, payload: Category) {
-            state.category.push({ ...payload, lists: [] })
+            state.categories.push({ ...payload, lists: [] })
             return state
         },
         upgradeCategory(state, payload: Category) {
-            state.category = state.category.map(cat => {
+            state.categories = state.categories.map(cat => {
                 if (cat.id === payload.id) cat = { ...cat, ...payload }
                 return cat
             })
             return state
         },
         deleteCategory(state, payload: string) {
-            state.category = state.category.filter(cat => cat.id !== payload)
+            state.categories = state.categories.filter(cat => cat.id !== payload)
             return state
         },
 
         addList(state, payload: List) {
-            let index = state.category.findIndex(cat => cat.id === payload.categoryId)
+            let index = state.categories.findIndex(cat => cat.id === payload.categoryId)
             if (index > -1) {
-                state.category[index].lists.push(payload)
+                state.categories[index].lists.push(payload)
             }
             return state
         },
         upgradeList(state, payload: UpdateList) {
-            let index = state.category.findIndex(cat => cat.id === payload.categoryId)
+            let index = state.categories.findIndex(cat => cat.id === payload.categoryId)
             if (index > -1) {
-                state.category[index].lists = state.category[index].lists.map(list => {
+                state.categories[index].lists = state.categories[index].lists.map(list => {
                     if (list.id === payload.id) list = { ...list, ...payload }
                     return list
                 })
@@ -66,9 +66,9 @@ export const category = createModel<RootModel>()({
             return state
         },
         deleteList(state, payload: { categoryId: string; listId: string }) {
-            let index = state.category.findIndex(cat => cat.id === payload.categoryId)
+            let index = state.categories.findIndex(cat => cat.id === payload.categoryId)
             if (index > -1) {
-                state.category[index].lists = state.category[index].lists.filter(
+                state.categories[index].lists = state.categories[index].lists.filter(
                     list => list.id !== payload.listId
                 )
             }

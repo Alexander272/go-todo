@@ -9,22 +9,34 @@
 
     &.horizontal {
         flex-direction: row;
+        align-items: center;
+
+        .input {
+            flex-grow: 1;
+        }
+
+        .label {
+            font-size: 1.2rem;
+            margin-bottom: 0;
+            margin-right: 15px;
+        }
     }
 }
 
 .label {
-    font-size: 0.75rem;
+    // font-size: 0.75rem;
     margin-bottom: 10px;
 }
 
 .input {
     padding: 0.5rem 1rem;
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(3, 121, 255, 0.5);
     letter-spacing: 1px;
     transition: 0.3s all ease-in-out;
     outline: none;
 
-    &:active {
+    &:active,
+    &:focus {
         border-color: rgba(17, 97, 237, 1);
     }
 

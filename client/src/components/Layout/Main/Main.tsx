@@ -1,15 +1,16 @@
-import { FC } from 'react'
-// import { Outlet } from 'react-router-dom'
-import { Profile } from '../../Profile/Profile'
-import classes from './main.module.scss'
+import { FC } from "react"
+import { Outlet } from "react-router-dom"
+import { Profile } from "../../Profile/Profile"
+import { Search } from "../../Search/Search"
+import classes from "./main.module.scss"
 
 export const MainLayout: FC = () => {
     return (
         <div className={classes.wrapper}>
             <Profile />
             <div className={classes.container}>
-                {/* Search */}
-                {/* <Outlet /> */}
+                <Search />
+                <Outlet />
             </div>
         </div>
     )
