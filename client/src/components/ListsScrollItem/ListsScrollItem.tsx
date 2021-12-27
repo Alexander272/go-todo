@@ -1,5 +1,6 @@
 import { FC } from "react"
 import { List } from "../../types/list"
+import { Checkbox } from "../UI/Checkbox/Checkbox"
 import classes from "./item.module.scss"
 
 type Props = {
@@ -18,7 +19,7 @@ export const ListScrollItem: FC<Props> = ({ item, className }) => {
 
     return (
         <div className={`${classes.item} ${className}`}>
-            <div>{/* checkbox disabled */}</div>
+            <Checkbox id='cbx' checked={false} />
             <div className={classes.content}>
                 <p className={classes.title}>{item.title}</p>
                 <p className={classes.date}>{date}</p>

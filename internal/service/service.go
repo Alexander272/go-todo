@@ -56,8 +56,9 @@ type TodoList interface {
 
 type TodoItem interface {
 	Create(ctx context.Context, dto domain.CreateTodoDTO) (string, error)
-	GetByListId(ctx context.Context, listId string) ([]domain.TodoItem, error)
+	GetByListId(ctx context.Context, listId, userId string) ([]domain.TodoItem, error)
 	GetByUserId(ctx context.Context, userId string) ([]domain.TodoItem, error)
+	GetAll(ctx context.Context, userId string) ([]domain.Todo, error)
 	GetById(ctx context.Context, itemId string) (domain.TodoItem, error)
 	Update(ctx context.Context, dto domain.UpdateTodoDTO) error
 	Remove(ctx context.Context, itemId string) error
@@ -85,7 +86,7 @@ func NewServices(deps Deps) *Services {
 	return &Services{
 		Session:  NewSessionService(deps.Repos.Users, deps.Repos.Session, deps.TokenManager, deps.Hasher, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.Domain),
 		User:     NewUserService(deps.Repos.Users, deps.TokenManager, deps.Hasher),
-		Category: NewCategoryService(deps.Repos.Category, deps.Repos.TodoList),
+		Category: NewCategoryService(deps.Repos.Category, deps.Repos.TodoList, deps.Repos.TodoItem),
 		TodoList: NewTodoListService(deps.Repos.TodoList, deps.Repos.TodoItem),
 		TodoItem: NewTodoItemService(deps.Repos.TodoItem),
 	}

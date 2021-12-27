@@ -38,7 +38,7 @@ type TodoList interface {
 	Create(ctx context.Context, list domain.TodoList) (string, error)
 	GetAll(ctx context.Context, userId string) ([]domain.TodoList, error)
 	GetById(ctx context.Context, listId string) (domain.TodoList, error)
-	GetByTitle(ctx context.Context, userId string, title string) (domain.TodoList, error)
+	GetByTitle(ctx context.Context, userId string, categoryId, title string) (domain.TodoList, error)
 	RemoveCatogoryId(ctx context.Context, categoryId string) error
 	Update(ctx context.Context, list domain.TodoList) error
 	Remove(ctx context.Context, listId string) error
@@ -46,8 +46,9 @@ type TodoList interface {
 
 type TodoItem interface {
 	Create(ctx context.Context, item domain.TodoItem) (string, error)
-	GetByListId(ctx context.Context, listId string) ([]domain.TodoItem, error)
+	GetByListId(ctx context.Context, listId, userId string) ([]domain.TodoItem, error)
 	GetByUserId(ctx context.Context, userId string) ([]domain.TodoItem, error)
+	GetAll(ctx context.Context, userId string) ([]domain.Todo, error)
 	GetById(ctx context.Context, itemId string) (domain.TodoItem, error)
 	GetByTitle(ctx context.Context, listId string, title string) (domain.TodoItem, error)
 	Update(ctx context.Context, item domain.TodoItem) error

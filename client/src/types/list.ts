@@ -4,6 +4,8 @@ export type List = {
     title: string
     description: string
     createdAt: number
+    completed: number
+    count: number
 }
 
 export type NewList = {

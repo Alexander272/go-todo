@@ -39,8 +39,8 @@ func (s *TodoItemService) Create(ctx context.Context, dto domain.CreateTodoDTO) 
 	return id, nil
 }
 
-func (s *TodoItemService) GetByListId(ctx context.Context, listId string) (items []domain.TodoItem, err error) {
-	items, err = s.repo.GetByListId(ctx, listId)
+func (s *TodoItemService) GetByListId(ctx context.Context, listId, userId string) (items []domain.TodoItem, err error) {
+	items, err = s.repo.GetByListId(ctx, listId, userId)
 	if err != nil {
 		if errors.Is(err, domain.ErrItemNotFound) {
 			return items, err
@@ -56,6 +56,21 @@ func (s *TodoItemService) GetByListId(ctx context.Context, listId string) (items
 
 func (s *TodoItemService) GetByUserId(ctx context.Context, userId string) (items []domain.TodoItem, err error) {
 	items, err = s.repo.GetByUserId(ctx, userId)
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			return items, err
+		}
+		return items, fmt.Errorf("failed to get items. error: %w", err)
+	}
+	if len(items) == 0 {
+		return items, domain.ErrItemNotFound
+	}
+
+	return items, nil
+}
+
+func (s *TodoItemService) GetAll(ctx context.Context, userId string) (items []domain.Todo, err error) {
+	items, err = s.repo.GetAll(ctx, userId)
 	if err != nil {
 		if errors.Is(err, domain.ErrItemNotFound) {
 			return items, err

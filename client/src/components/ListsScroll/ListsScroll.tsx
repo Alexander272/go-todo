@@ -16,7 +16,7 @@ export const ListsScroll: FC<Props> = ({ title, data }) => {
     }
 
     return (
-        <div className={`${classes.scroll} ${isOpen && classes.active}`}>
+        <div className={`${classes.scroll} ${isOpen ? classes.active : ""}`}>
             <div className={`${classes.header} ${classes.item}`} onClick={toggle}>
                 <p className={classes.title}>
                     {title}
@@ -25,6 +25,9 @@ export const ListsScroll: FC<Props> = ({ title, data }) => {
             </div>
             <div className={classes.content}>
                 {isOpen && data.map(d => <ListScrollItem item={d} className={classes.item} />)}
+                {/* {data.map(d => (
+                    <ListScrollItem item={d} className={classes.item} />
+                ))} */}
             </div>
         </div>
     )

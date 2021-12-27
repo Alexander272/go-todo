@@ -40,8 +40,8 @@ func (r *TodoItemRepo) Create(ctx context.Context, item domain.TodoItem) (id str
 	return oid.Hex(), nil
 }
 
-func (r *TodoItemRepo) GetByListId(ctx context.Context, listId string) (items []domain.TodoItem, err error) {
-	filter := bson.M{"listId": listId}
+func (r *TodoItemRepo) GetByListId(ctx context.Context, listId, userId string) (items []domain.TodoItem, err error) {
+	filter := bson.M{"listId": listId, "userId": userId}
 	cursor, err := r.db.Find(ctx, filter)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -63,6 +63,33 @@ func (r *TodoItemRepo) GetByUserId(ctx context.Context, userId string) (items []
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return items, domain.ErrItemNotFound
+		}
+		return items, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+
+	if err := cursor.All(ctx, &items); err != nil {
+		return items, fmt.Errorf("failed to decode document. error: %w", err)
+	}
+	return items, nil
+}
+
+func (r *TodoItemRepo) GetAll(ctx context.Context, userId string) (items []domain.Todo, err error) {
+	pipeline := []bson.M{
+		{"$match": bson.M{"userId": userId}},
+		{"$group": bson.M{
+			"_id": "$listId",
+			"items": bson.M{"$push": bson.M{
+				"_id":   "$_id",
+				"title": "$title",
+				"done":  "$done",
+			}},
+		}},
+	}
+
+	cursor, err := r.db.Aggregate(ctx, pipeline)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return items, domain.ErrListNotFound
 		}
 		return items, fmt.Errorf("failed to execute query. error: %w", err)
 	}

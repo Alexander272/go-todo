@@ -17,6 +17,8 @@ type TodoListShort struct {
 	Title       string `json:"title" bson:"title,omitempty"`
 	Description string `json:"description" bson:"description,omitempty"`
 	CreatedAt   int64  `json:"createdAt" bson:"createdAt,omitempty"`
+	Comlited    int    `json:"comlited"`
+	Count       int    `json:"count"`
 	// Tags        []string  `json:"tags" bson:"tags"`
 }
 

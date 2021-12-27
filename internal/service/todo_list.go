@@ -22,7 +22,7 @@ func NewTodoListService(repo repository.TodoList, repoItem repository.TodoItem) 
 }
 
 func (s *TodoListServise) Create(ctx context.Context, dto domain.CreateListDTO) (id string, err error) {
-	candidate, err := s.repo.GetByTitle(ctx, dto.UserId, dto.Title)
+	candidate, err := s.repo.GetByTitle(ctx, dto.UserId, dto.CategoryId, dto.Title)
 	if err != nil {
 		if !errors.Is(err, domain.ErrListNotFound) {
 			return id, fmt.Errorf("failed to get list by title. error: %w", err)

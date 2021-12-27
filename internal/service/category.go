@@ -7,17 +7,20 @@ import (
 
 	"github.com/Alexander272/go-todo/internal/domain"
 	"github.com/Alexander272/go-todo/internal/repository"
+	"github.com/Alexander272/go-todo/pkg/logger"
 )
 
 type CategoryService struct {
 	repo     repository.Category
 	repoList repository.TodoList
+	repoItem repository.TodoItem
 }
 
-func NewCategoryService(repo repository.Category, repoList repository.TodoList) *CategoryService {
+func NewCategoryService(repo repository.Category, repoList repository.TodoList, repoItem repository.TodoItem) *CategoryService {
 	return &CategoryService{
 		repo:     repo,
 		repoList: repoList,
+		repoItem: repoItem,
 	}
 }
 
@@ -67,6 +70,37 @@ func (s *CategoryService) GetWithLists(ctx context.Context, userId string) (cate
 	if len(categories) == 0 {
 		return categories, domain.ErrCategoryNotFound
 	}
+
+	lists, err := s.repoItem.GetAll(ctx, userId)
+	if err != nil {
+		if errors.Is(err, domain.ErrListNotFound) {
+			return categories, err
+		}
+		return categories, fmt.Errorf("failed to get categories. error: %w", err)
+	}
+
+	for i, cat := range categories {
+		for j, list := range cat.Lists {
+			for _, t := range lists {
+				logger.Debug(list.Id == t.Id, " ", list.Id, " ", t.Id)
+				if list.Id == t.Id {
+					logger.Debug(i, " ", j)
+					categories[i].Lists[j].Count = len(t.Items)
+					complited := 0
+					for _, item := range t.Items {
+						if item.Done {
+							complited++
+						}
+					}
+
+					categories[i].Lists[j].Comlited = complited
+					break
+				}
+			}
+		}
+	}
+
+	logger.Debug(categories[0].Lists[2].Count)
 
 	return categories, nil
 }

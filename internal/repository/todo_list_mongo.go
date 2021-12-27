@@ -76,8 +76,8 @@ func (r *TodoListRepo) GetById(ctx context.Context, listId string) (list domain.
 	return list, nil
 }
 
-func (r *TodoListRepo) GetByTitle(ctx context.Context, userId string, title string) (list domain.TodoList, err error) {
-	filter := bson.M{"title": title, "userId": userId}
+func (r *TodoListRepo) GetByTitle(ctx context.Context, userId, categoryId, title string) (list domain.TodoList, err error) {
+	filter := bson.M{"title": title, "userId": userId, "categoryId": categoryId}
 	res := r.db.FindOne(ctx, filter)
 	if res.Err() != nil {
 		if errors.Is(res.Err(), mongo.ErrNoDocuments) {

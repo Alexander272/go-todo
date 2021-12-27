@@ -1,6 +1,6 @@
 import { FC } from "react"
 import { useSelector } from "react-redux"
-import { RootState } from "../../store/store"
+import { RootState, store } from "../../store/store"
 import { CategoryList } from "../CategoryList/CategoryList"
 import { useModal } from "../Modal/hooks/useModal"
 import { Modal } from "../Modal/Modal"
@@ -10,8 +10,9 @@ import classes from "./profile.module.scss"
 
 export const Profile: FC = () => {
     const nicname = useSelector((state: RootState) => state.user.nickname)
-    const completed = useSelector((state: RootState) => state.todo.completed)
-    const remaining = useSelector((state: RootState) => state.todo.remaining)
+
+    const total = useSelector(store.select.category.total)
+    const { completed, count } = useSelector(store.select.category.completed)
 
     const { isOpen, toggle } = useModal()
 
@@ -29,28 +30,28 @@ export const Profile: FC = () => {
                 </div>
                 <div className={classes.progress}>
                     <p className={classes.progress__count}>
-                        {completed}/{remaining}
+                        {completed}/{count}
                     </p>
                     <div className={classes.progress__bar}>
                         <div
-                            style={{ width: `${(completed / remaining) * 100}%` }}
+                            style={{ width: `${(completed / (count || 1)) * 100}%` }}
                             className={classes.progress__line}
                         ></div>
                     </div>
                 </div>
                 <div className={classes.status}>
                     <div className={classes.status__item}>
-                        <p className={classes.status__count}>12</p>
+                        <p className={classes.status__count}>{completed}</p>
                         <p className={classes.status__text}>Completed</p>
                         <p className={classes.status__tasks}>tasks</p>
                     </div>
                     <div className={classes.status__item}>
-                        <p className={classes.status__count}>22</p>
+                        <p className={classes.status__count}>{count - completed}</p>
                         <p className={classes.status__text}>To do</p>
                         <p className={classes.status__tasks}>tasks</p>
                     </div>
                     <div className={classes.status__item}>
-                        <p className={classes.status__count}>243</p>
+                        <p className={classes.status__count}>{total}</p>
                         <p className={classes.status__text}>All</p>
                         <p className={classes.status__tasks}>completed</p>
                     </div>

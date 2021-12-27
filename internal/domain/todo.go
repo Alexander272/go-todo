@@ -1,7 +1,13 @@
 package domain
 
+type Todo struct {
+	Id    string      `json:"id" bson:"_id,omitempty"`
+	Items []TodoShort `json:"items" bson:"items"`
+}
+
 type TodoItem struct {
 	Id          string `json:"id" bson:"_id,omitempty"`
+	UserId      string `json:"-" bson:"userId,omitempty"`
 	ListId      string `json:"listId" bson:"listId,omitempty"`
 	Title       string `json:"title" bson:"title,omitempty"`
 	Description string `json:"description" bson:"description,omitempty"`
@@ -12,8 +18,15 @@ type TodoItem struct {
 	Priority    int    `json:"priority" bson:"priority,omitempty"`
 }
 
+type TodoShort struct {
+	Id    string `json:"id" bson:"_id,omitempty"`
+	Title string `json:"title" bson:"title,omitempty"`
+	Done  bool   `json:"done" bson:"done,omitempty"`
+}
+
 type CreateTodoDTO struct {
 	ListId      string `json:"listId" binding:"required"`
+	UserId      string
 	Title       string `json:"title" binding:"required,min=3,max=128"`
 	Description string `json:"description"`
 	StartAt     int64  `json:"startAt"`
@@ -23,6 +36,7 @@ type CreateTodoDTO struct {
 func NewTodo(dto CreateTodoDTO) TodoItem {
 	return TodoItem{
 		ListId:      dto.ListId,
+		UserId:      dto.UserId,
 		Title:       dto.Title,
 		Description: dto.Description,
 		StartAt:     dto.StartAt,

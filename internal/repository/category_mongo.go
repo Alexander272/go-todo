@@ -53,14 +53,13 @@ func (r *CategoryRepo) GetAll(ctx context.Context, userId string) (categories []
 }
 
 func (r *CategoryRepo) GetWithLists(ctx context.Context, userId string) (categories []domain.CategoryWithLists, err error) {
-	// filter := bson.M{"userId": userId}
 	pipeline := []bson.M{
 		{"$match": bson.M{"userId": userId}},
-		{"$addFields": bson.M{"categoryId": bson.M{"$toString": "$_id"}}},
+		{"$addFields": bson.M{"_categoryId": bson.M{"$toString": "$_id"}}},
 		{
 			"$lookup": bson.M{
 				"from":         "todoList",
-				"localField":   "categoryId",
+				"localField":   "_categoryId",
 				"foreignField": "categoryId",
 				"as":           "lists",
 			},

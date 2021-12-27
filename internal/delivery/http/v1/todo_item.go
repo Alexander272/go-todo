@@ -15,6 +15,7 @@ func (h *Handler) initItemRoutes(api *gin.RouterGroup) {
 	{
 		todo.POST("/", h.createItem)
 		todo.GET("/all", h.getAllItems)
+		todo.GET("/list", h.getAllIt)
 		todo.GET("/:id", h.getItemById)
 		todo.PATCH("/:id", h.updateItem)
 		todo.DELETE("/:id", h.removeItem)
@@ -40,7 +41,13 @@ func (h *Handler) getItemsByListId(c *gin.Context) {
 		return
 	}
 
-	lists, err := h.services.TodoItem.GetByListId(c, listId)
+	userId, exists := c.Get(userIdCtx)
+	if !exists {
+		newErrorResponse(c, http.StatusForbidden, "access not allowed")
+		return
+	}
+
+	lists, err := h.services.TodoItem.GetByListId(c, listId, userId.(string))
 	if err != nil {
 		if errors.Is(err, domain.ErrItemNotFound) {
 			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
@@ -72,6 +79,13 @@ func (h *Handler) createItem(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
+
+	userId, exists := c.Get(userIdCtx)
+	if !exists {
+		newErrorResponse(c, http.StatusForbidden, "access not allowed")
+		return
+	}
+	dto.UserId = userId.(string)
 
 	id, err := h.services.TodoItem.Create(c, dto)
 	if err != nil {
@@ -107,6 +121,38 @@ func (h *Handler) getAllItems(c *gin.Context) {
 	}
 
 	items, err := h.services.TodoItem.GetByUserId(c, userId.(string))
+	if err != nil {
+		if errors.Is(err, domain.ErrItemNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{err.Error()})
+			return
+		}
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, dataResponse{Data: items})
+}
+
+// @Summary Get All Items
+// @Tags todo
+// @Security ApiKeyAuth
+// @Description получение всех задач пользователя
+// @ModuleID getAllItems
+// @Accept json
+// @Produce json
+// @Success 200 {object} dataResponse{data=[]domain.TodoItem}
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /todos/all [get]
+func (h *Handler) getAllIt(c *gin.Context) {
+	userId, exists := c.Get(userIdCtx)
+	if !exists {
+		newErrorResponse(c, http.StatusForbidden, "access not allowed")
+		return
+	}
+
+	items, err := h.services.TodoItem.GetAll(c, userId.(string))
 	if err != nil {
 		if errors.Is(err, domain.ErrItemNotFound) {
 			c.JSON(http.StatusNotFound, errorResponse{err.Error()})

@@ -27,18 +27,32 @@ export const category = createModel<RootModel>()({
                         title: "first list",
                         description: "mock list",
                         createdAt: 1640342763,
+                        completed: 1,
+                        count: 3,
                     },
                     {
                         id: "i2",
                         title: "seconde list",
                         description: "mock list",
                         createdAt: 1640342763,
+                        completed: 0,
+                        count: 2,
                     },
                     {
                         id: "i3",
                         title: "third list",
                         description: "mock list",
                         createdAt: 1640342763,
+                        completed: 4,
+                        count: 4,
+                    },
+                    {
+                        id: "i4",
+                        title: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+                        description: "mock list",
+                        createdAt: 1640342763,
+                        completed: 7,
+                        count: 7,
                     },
                 ],
             },
@@ -51,6 +65,8 @@ export const category = createModel<RootModel>()({
                         title: "first list",
                         description: "mock list",
                         createdAt: 1640342763,
+                        completed: 3,
+                        count: 9,
                     },
                 ],
             },
@@ -58,6 +74,32 @@ export const category = createModel<RootModel>()({
         ],
         selectedCategories: ["123"],
     } as ICategoryState,
+    selectors: slice => ({
+        total() {
+            return slice(categories =>
+                categories.categories.reduce(
+                    (a, b) => a + b.lists.reduce((a, b) => a + b.completed, 0),
+                    0
+                )
+            )
+        },
+        completed() {
+            return slice(categories => {
+                let completed = 0
+                let count = 0
+                categories.selectedCategories.forEach(selCat => {
+                    categories.categories.forEach(cat => {
+                        if (selCat.includes(cat.id)) {
+                            completed += cat.lists.reduce((a, b) => a + b.completed, 0)
+                            count += cat.lists.reduce((a, b) => a + b.count, 0)
+                        }
+                    })
+                })
+
+                return { completed, count }
+            })
+        },
+    }),
 
     reducers: {
         setLoading(state, payload: boolean) {
@@ -183,6 +225,8 @@ export const category = createModel<RootModel>()({
                         id: res.data.id,
                         ...payload,
                         createdAt: +(Date.now() / 1000).toFixed(0),
+                        completed: 0,
+                        count: 0,
                     })
                     toast.success(res.data.message)
                 } catch (error: any) {

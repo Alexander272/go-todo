@@ -1,6 +1,14 @@
 .scroll {
     margin-left: 2px;
     &.active {
+        // .content {
+        //     max-height: 600px;
+        // }
+
+        .icon {
+            transform: rotate(180deg);
+            color: var(--button-color);
+        }
     }
 }
 
@@ -8,21 +16,17 @@
     border-left: 4px solid var(--button-color);
     cursor: pointer;
 
-    &:hover {
-    }
+    // &:hover {
+    // }
 }
 
 .item {
     padding: 15px 35px;
-    border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
 
-    &:first-child {
-        border-top: none;
-    }
-    &:last-child {
-        border-bottom: none;
-    }
+    // &:last-child {
+    //     border-bottom-color: var(--button-color);
+    // }
 }
 
 .title {
@@ -34,8 +38,11 @@
 }
 .icon {
     display: block;
+    transition: all 0.5s ease-in-out;
 }
 
 .content {
-    max-height: 0;
+    // max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
 }
