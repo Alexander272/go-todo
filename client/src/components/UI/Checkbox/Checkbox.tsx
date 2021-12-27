@@ -6,10 +6,11 @@ type Props = {
     id: string
     checked: boolean
     name?: string
-    onClick?: () => void
+    readOnly?: boolean
+    onClick?: (event: React.MouseEvent<HTMLInputElement>) => void
 }
 
-export const Checkbox: FC<Props> = ({ label, id, checked, name, onClick }) => {
+export const Checkbox: FC<Props> = ({ label, id, checked, name, readOnly, onClick }) => {
     return (
         <div className={classes.checkbox}>
             <input
@@ -19,6 +20,7 @@ export const Checkbox: FC<Props> = ({ label, id, checked, name, onClick }) => {
                 checked={checked}
                 name={name}
                 onClick={onClick}
+                readOnly={readOnly}
             />
             <label className={classes.label} htmlFor={id}>
                 <span>

@@ -24,7 +24,8 @@ export const ListsScroll: FC<Props> = ({ title, data }) => {
                 </p>
             </div>
             <div className={classes.content}>
-                {isOpen && data.map(d => <ListScrollItem item={d} className={classes.item} />)}
+                {isOpen &&
+                    data.map(d => <ListScrollItem key={d.id} item={d} className={classes.item} />)}
                 {/* {data.map(d => (
                     <ListScrollItem item={d} className={classes.item} />
                 ))} */}
