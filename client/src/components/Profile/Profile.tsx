@@ -34,7 +34,7 @@ export const Profile: FC = () => {
     }
 
     return (
-        <div className={classes.profile}>
+        <div className={`${classes.profile} scroll`}>
             <h3 className={classes.appName}>Task Manager</h3>
             <div className={classes.wrapper}>
                 <div className={classes.profileBlock}>

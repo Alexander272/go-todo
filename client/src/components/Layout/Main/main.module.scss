@@ -1,7 +1,11 @@
 .wrapper {
-    min-height: 100vh;
+    height: 100vh;
     min-width: 320px;
     display: flex;
+    max-width: 1920px;
+    margin: 0 auto;
+    background-color: var(--theme-bg-color);
+    overflow: hidden;
     // flex-direction: column;
 }
 

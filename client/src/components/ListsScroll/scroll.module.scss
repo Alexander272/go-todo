@@ -1,5 +1,6 @@
 .scroll {
-    margin-left: 2px;
+    overflow: auto;
+
     &.active {
         // .content {
         //     max-height: 600px;

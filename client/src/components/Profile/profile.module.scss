@@ -3,19 +3,21 @@
     max-width: 340px;
     flex-grow: 1;
     border-right: 1px solid var(--border-color);
+    overflow: auto;
 }
 
 .appName {
     text-align: center;
-    padding: 25px 0;
+    padding: 20px 0;
     font-size: 1.1rem;
     text-transform: uppercase;
     color: var(--title-color);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
-    z-index: 3px;
+    z-index: 3;
     background-color: var(--theme-bg-color);
+    height: 70px;
 }
 
 .wrapper {

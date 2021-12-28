@@ -5,18 +5,19 @@ import classes from "./scroll.module.scss"
 
 type Props = {
     title: string
+    open?: boolean
     data: List[]
 }
 
-export const ListsScroll: FC<Props> = ({ title, data }) => {
-    const [isOpen, setIsOpen] = useState(false)
+export const ListsScroll: FC<Props> = ({ title, data, open }) => {
+    const [isOpen, setIsOpen] = useState(open || false)
 
     const toggle = () => {
         setIsOpen(prev => !prev)
     }
 
     return (
-        <div className={`${classes.scroll} ${isOpen ? classes.active : ""}`}>
+        <div className={`${classes.scroll} scroll ${isOpen ? classes.active : ""}`}>
             <div className={`${classes.header} ${classes.item}`} onClick={toggle}>
                 <p className={classes.title}>
                     {title}
