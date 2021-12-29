@@ -25,7 +25,8 @@ export const category = createModel<RootModel>()({
                     {
                         id: "i1",
                         title: "first list",
-                        description: "mock list",
+                        description:
+                            "mock list Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui dignissimos ab, ad necessitatibus aliquid recusandae! Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui dignissimos ab, ad necessitatibus aliquid recusandae!",
                         createdAt: 1640342763,
                         completed: 1,
                         count: 3,

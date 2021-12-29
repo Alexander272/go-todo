@@ -1,11 +1,7 @@
-import React, { FC, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { Dispatch, RootState, store } from "../../store/store"
+import { FC } from "react"
+import { useSelector } from "react-redux"
+import { RootState, store } from "../../store/store"
 import { CategoryList } from "../CategoryList/CategoryList"
-import { useModal } from "../Modal/hooks/useModal"
-import { Modal } from "../Modal/Modal"
-import { Button } from "../UI/Button/Button"
-import { Input } from "../UI/Input/Input"
 import classes from "./profile.module.scss"
 
 export const Profile: FC = () => {
@@ -13,25 +9,6 @@ export const Profile: FC = () => {
 
     const total = useSelector(store.select.category.total)
     const { completed, count } = useSelector(store.select.category.completed)
-    const { category } = useDispatch<Dispatch>()
-
-    const [error, setError] = useState(false)
-    const [title, setTitle] = useState("")
-
-    const { isOpen, toggle } = useModal()
-
-    const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle(event.target.value)
-    }
-
-    const saveHandler = () => {
-        if (!title.trim()) {
-            setError(true)
-            return
-        }
-        setError(false)
-        category.newCategory({ title })
-    }
 
     return (
         <div className={`${classes.profile} scroll`}>
@@ -76,42 +53,8 @@ export const Profile: FC = () => {
             </div>
 
             <div className={classes.wrapper}>
-                <div className={classes.projects}>
-                    <div className={classes.projects__header}>
-                        <p className={classes.projects__title}>Groups</p>
-                        <Button.Circle onClick={toggle} size='small' variant='grayPrimary'>
-                            +
-                        </Button.Circle>
-                    </div>
-                    <CategoryList />
-                </div>
+                <CategoryList />
             </div>
-
-            {isOpen && (
-                <Modal isOpen={isOpen} toggle={toggle}>
-                    <Modal.Header title='Create group' onClose={toggle} />
-                    <Modal.Content>
-                        <Input
-                            name='title'
-                            placeholder='title'
-                            value={title}
-                            error={error}
-                            errorText={"Title is required"}
-                            onChange={changeHandler}
-                        />
-                    </Modal.Content>
-                    <Modal.Footer>
-                        <div className={classes.btns}>
-                            <Button size='small' onClick={toggle} variant='grayPrimary'>
-                                Cancel
-                            </Button>
-                            <Button size='small' onClick={saveHandler}>
-                                Create
-                            </Button>
-                        </div>
-                    </Modal.Footer>
-                </Modal>
-            )}
         </div>
     )
 }

@@ -2,3 +2,40 @@
     flex-grow: 1;
     overflow: auto;
 }
+
+.empty {
+    margin: 20px;
+    font-size: 0.9rem;
+    color: var(--main-light-color);
+}
+
+.container {
+    padding: 20px;
+}
+
+.title {
+    font-size: 1.2rem;
+}
+
+.dateContainer {
+    display: flex;
+    align-items: center;
+    color: var(--main-light-color);
+
+    & > svg {
+        height: 18px;
+    }
+}
+.date {
+    margin-left: 5px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.description {
+    padding: 20px 0 30px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--main-color);
+    line-height: 1.6rem;
+    text-align: justify;
+}

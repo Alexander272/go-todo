@@ -1,5 +1,29 @@
+.projects {
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    &__title {
+        padding-left: 5px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+}
+
 .empty {
     padding-left: 5px;
     font-size: 0.9rem;
     color: var(--main-light-color);
+}
+
+.btns {
+    display: flex;
+    flex-grow: 1;
+
+    button:nth-child(n) {
+        margin: 0 5px;
+    }
 }
