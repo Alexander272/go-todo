@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { Dispatch, RootState } from "../../store/store"
-import { CategoryWithLists } from "../../types/category"
+import { Category, CategoryWithLists } from "../../types/category"
 import { CategoryItem } from "../CategoryItem/CategoryItem"
 import { useModal } from "../Modal/hooks/useModal"
 import { Modal } from "../Modal/Modal"
@@ -14,7 +14,7 @@ export const CategoryList = () => {
     const selCat = useSelector((state: RootState) => state.category.selectedCategories)
 
     const [error, setError] = useState(false)
-    const [catState, setCatState] = useState({ id: "", title: "" })
+    const [catState, setCatState] = useState<Category>({ id: "", title: "" })
 
     const { isOpen, toggle } = useModal()
 

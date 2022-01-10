@@ -1,0 +1,99 @@
+.select {
+    position: relative;
+    width: 100%;
+
+    &.close {
+        .selected {
+            border-color: rgba(3, 121, 255, 0.5);
+        }
+        .icon {
+            transform: rotate(0deg);
+        }
+
+        .options {
+            overflow: hidden;
+            max-height: 0px;
+            // padding: 0;
+            border-width: 0;
+        }
+    }
+}
+
+.selected {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 7px 15px;
+    border: 2px solid rgba(17, 97, 237, 1);
+    border-radius: 12px;
+    transition: all 0.3s ease-in-out;
+
+    .icon {
+        transition: all 0.3s ease-in-out;
+        transform: rotate(180deg);
+    }
+
+    &:hover {
+        border-color: rgba(17, 97, 237, 1);
+    }
+}
+
+.options {
+    position: absolute;
+    left: 0;
+    top: 45px;
+    overflow-y: auto;
+    max-height: 350px;
+    z-index: 15;
+    width: 100%;
+    transition: all 0.5s ease-in-out;
+    border: 2px solid rgba(17, 97, 237, 1);
+    // padding: 2px;
+    border-radius: 12px;
+    background-color: rgba(17, 97, 237, 1);
+}
+
+.option {
+    background-color: #fff;
+    padding: 7px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    border-bottom: 1px solid rgba(17, 97, 237, 1);
+    &:last-child {
+        border: none;
+    }
+
+    &::after,
+    &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 14px solid transparent;
+        transition: all 0.3s ease-in-out;
+    }
+    &::before {
+        left: 0;
+    }
+    &::after {
+        right: 0;
+    }
+
+    &:hover {
+        &::after {
+            border-right-color: rgba(17, 97, 237, 1);
+        }
+        &::before {
+            border-left-color: rgba(17, 97, 237, 1);
+        }
+    }
+
+    &.disabled {
+        background-color: #eee;
+        pointer-events: none;
+    }
+}

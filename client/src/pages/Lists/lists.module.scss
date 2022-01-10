@@ -39,3 +39,12 @@
         width: 130px;
     }
 }
+
+.btns {
+    display: flex;
+    flex-grow: 1;
+
+    button:nth-child(n) {
+        margin: 0 5px;
+    }
+}
