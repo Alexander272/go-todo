@@ -90,7 +90,10 @@ export const CategoryList = () => {
 
             {isOpen && (
                 <Modal isOpen={isOpen} toggle={toggle}>
-                    <Modal.Header title='Create group' onClose={toggle} />
+                    <Modal.Header
+                        title={`${catState.id !== "" ? "Update" : "Create"} group`}
+                        onClose={toggle}
+                    />
                     <Modal.Content>
                         <Input
                             name='title'

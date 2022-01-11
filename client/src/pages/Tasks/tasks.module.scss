@@ -1,6 +1,8 @@
 .tasks {
     flex-grow: 1;
     overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .empty {
@@ -11,6 +13,9 @@
 
 .container {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .title {
@@ -38,4 +43,23 @@
     color: var(--main-color);
     line-height: 1.6rem;
     text-align: justify;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    margin-top: auto;
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--theme-bg-color);
+
+    & > button {
+        width: 130px;
+        margin: 0 30px;
+    }
 }

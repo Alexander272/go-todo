@@ -1,4 +1,6 @@
 import { useSelector } from "react-redux"
+import { TaskList } from "../../components/TaskList/TaskList"
+import { Button } from "../../components/UI/Button/Button"
 import { RootState } from "../../store/store"
 import classes from "./tasks.module.scss"
 
@@ -40,6 +42,22 @@ export default function Tasks() {
                     </div>
 
                     <p className={classes.description}>{selectList.description}</p>
+
+                    <TaskList />
+
+                    <div className={classes.buttons}>
+                        <Button
+                            size='small'
+                            variant='grayPrimary'
+                            rounded='round'
+                            onClick={() => {}}
+                        >
+                            Edit list
+                        </Button>
+                        <Button size='small' rounded='round' onClick={() => {}}>
+                            Add task
+                        </Button>
+                    </div>
                 </div>
             )}
         </div>

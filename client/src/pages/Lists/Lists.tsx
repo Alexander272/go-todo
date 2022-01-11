@@ -51,7 +51,7 @@ export default function ListsPage() {
         <div className={classes.page}>
             {isOpen && (
                 <Modal isOpen={isOpen} toggle={toggle}>
-                    <Modal.Header title='Create group' onClose={toggle} />
+                    <Modal.Header title='Create list' onClose={toggle} />
                     <Modal.Content>
                         <Select value={listState.categoryId} onChange={selectHandler}>
                             {categories.map(cat => (

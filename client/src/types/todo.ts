@@ -22,6 +22,7 @@ export type UpdateTodo = {
     id: string
     listId?: string
     title?: string
+    done?: boolean
     description?: string
     startAt?: number
     priority?: number
